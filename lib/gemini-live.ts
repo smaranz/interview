@@ -13,9 +13,9 @@ export class GeminiLiveClient {
   private workletNode: AudioWorkletNode | null = null
   private mediaStream: MediaStream | null = null
   private isConnected = false
+  private onStatusChange: ((status: 'connected' | 'disconnected' | 'connecting') => void) | null = null
   private onAudioData: ((data: Int16Array) => void) | null = null
   private onTextData: ((text: string) => void) | null = null
-  private onStatusChange: ((status: 'connected' | 'disconnected' | 'connecting') => void) | null = null
   private audioQueue: Float32Array[] = []
   private isPlaying = false
   private nextPlayTime = 0
@@ -38,7 +38,8 @@ export class GeminiLiveClient {
   constructor(apiKey: string, config: LiveConfig = {}) {
     this.apiKey = apiKey
     this.config = {
-      model: 'models/gemini-2.0-flash-exp',
+      // Updated to the model specified in the docs
+      model: 'models/gemini-2.0-flash-exp', 
       ...config
     }
   }
@@ -54,20 +55,30 @@ export class GeminiLiveClient {
   }
 
   async connect() {
+    if (!this.apiKey) {
+      console.error('GeminiLiveClient: API key is missing')
+      this.onStatusChange?.('disconnected')
+      return
+    }
+
     if (this.ws) {
       this.disconnect()
     }
 
     this.onStatusChange?.('connecting')
 
+    // Ensure we're using the correct websocket URL
     const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${this.apiKey}`
+    console.log('GeminiLiveClient: Connecting to', url.replace(this.apiKey, 'API_KEY_HIDDEN'))
+    
     this.ws = new WebSocket(url)
 
-    this.ws.onopen = () => {
+    this.ws.onopen = async () => {
+      console.log('GeminiLiveClient: WebSocket connected')
       this.isConnected = true
       this.onStatusChange?.('connected')
       this.sendSetupMessage()
-      this.startAudioInput()
+      await this.startAudioInput()
     }
 
     this.ws.onmessage = async (event) => {
@@ -78,19 +89,23 @@ export class GeminiLiveClient {
         } else {
           data = JSON.parse(event.data)
         }
+        // console.log('GeminiLiveClient: Received message', data) // Uncomment for debugging
         this.handleServerMessage(data)
       } catch (e) {
-        console.error('Error parsing message:', e)
+        console.error('GeminiLiveClient: Error parsing message:', e)
       }
     }
 
-    this.ws.onclose = () => {
+    this.ws.onclose = (event) => {
+      console.log('GeminiLiveClient: WebSocket closed', event.code, event.reason)
       this.cleanup()
+      this.onStatusChange?.('disconnected')
     }
 
     this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error)
+      console.error('GeminiLiveClient: WebSocket error:', error)
       this.cleanup()
+      this.onStatusChange?.('disconnected')
     }
   }
 
@@ -109,21 +124,28 @@ export class GeminiLiveClient {
       }
     }
 
+    console.log('GeminiLiveClient: Sending setup message', JSON.stringify(setupMessage))
     this.ws.send(JSON.stringify(setupMessage))
   }
 
   private async startAudioInput() {
     try {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
-        sampleRate: 16000 // Gemini expects 16kHz input usually, but we can resample
+        sampleRate: 16000 // Gemini expects 16kHz input usually
       })
+
+      // Resume audio context if suspended (browser policy)
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume()
+      }
 
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
           sampleRate: 16000,
           echoCancellation: true,
-          noiseSuppression: true
+          noiseSuppression: true,
+          autoGainControl: true
         }
       })
 
@@ -140,9 +162,9 @@ export class GeminiLiveClient {
       }
 
       source.connect(this.workletNode)
-      this.workletNode.connect(this.audioContext.destination) // Needed to keep processor alive in some browsers?
+      // this.workletNode.connect(this.audioContext.destination) // Don't connect to destination to avoid self-loop echo
     } catch (error) {
-      console.error('Failed to start audio input:', error)
+      console.error('GeminiLiveClient: Failed to start audio input:', error)
     }
   }
 
@@ -180,13 +202,17 @@ export class GeminiLiveClient {
           const pcmData = this.base64ToArrayBuffer(part.inlineData.data)
           this.playAudioChunk(pcmData)
         }
+        // Handle text if provided (for transcript)
         if (part.text) {
           this.onTextData?.(part.text)
         }
       }
     }
     
-    // Handle tool calls or other messages if needed
+    // Handle turnComplete or other signals
+    if (data.serverContent?.turnComplete) {
+      // console.log('Turn complete')
+    }
   }
 
   private playAudioChunk(pcmData: ArrayBuffer) {
@@ -234,8 +260,8 @@ export class GeminiLiveClient {
   }
 
   disconnect() {
+    console.log('GeminiLiveClient: Disconnecting')
     this.isConnected = false
-    this.onStatusChange?.('disconnected')
     
     if (this.ws) {
       this.ws.close()
@@ -286,4 +312,3 @@ export class GeminiLiveClient {
     return bytes.buffer
   }
 }
-
