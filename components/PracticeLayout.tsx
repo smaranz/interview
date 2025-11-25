@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { CheatMonitor } from '@/components/CheatMonitor'
 import { cn } from '@/lib/utils'
 import { createMockSession, getNextMockQuestion, getMockFeedback, type AIMessage } from '@/lib/realtime'
 
@@ -181,8 +180,6 @@ export function PracticeLayout() {
             </Button>
           </div>
         </div>
-        
-        <CheatMonitor isActive={isSessionActive} />
       </div>
       
       <div className="flex h-[600px] flex-col rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">

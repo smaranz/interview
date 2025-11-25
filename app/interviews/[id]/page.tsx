@@ -53,17 +53,6 @@ export default async function InterviewPage({ params }: PageProps) {
     .order('created_at', { ascending: false })
     .limit(10)
 
-  const { data: cheatSnapshots } = await supabase
-    .from('cheat_snapshots')
-    .select('*')
-    .eq('interview_id', id)
-    .order('timestamp', { ascending: false })
-    .limit(5)
-
-  const averageScore = cheatSnapshots && cheatSnapshots.length > 0
-    ? Math.round(cheatSnapshots.reduce((acc, s) => acc + s.score, 0) / cheatSnapshots.length)
-    : null
-
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -122,7 +111,7 @@ export default async function InterviewPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Interview Details</CardTitle>
@@ -161,31 +150,6 @@ export default async function InterviewPage({ params }: PageProps) {
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Integrity Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {averageScore !== null ? (
-                <div className="flex items-center gap-4">
-                  <div className={`text-4xl font-bold ${
-                    averageScore >= 80 ? 'text-emerald-500' :
-                    averageScore >= 60 ? 'text-amber-500' : 'text-red-500'
-                  }`}>
-                    {averageScore}%
-                  </div>
-                  <div className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Average score across {cheatSnapshots?.length} snapshots
-                  </div>
-                </div>
-              ) : (
-                <p className="text-zinc-500 dark:text-zinc-400">
-                  No integrity data recorded yet
-                </p>
-              )}
             </CardContent>
           </Card>
 
