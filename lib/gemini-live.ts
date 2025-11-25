@@ -38,8 +38,7 @@ export class GeminiLiveClient {
   constructor(apiKey: string, config: LiveConfig = {}) {
     this.apiKey = apiKey
     this.config = {
-      // Updated to the model specified in the docs
-      model: 'models/gemini-2.0-flash-exp', 
+      model: 'models/gemini-2.0-flash-exp',
       ...config
     }
   }
@@ -67,11 +66,24 @@ export class GeminiLiveClient {
 
     this.onStatusChange?.('connecting')
 
-    // Ensure we're using the correct websocket URL
-    const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${this.apiKey}`
+    // Construct the WebSocket URL
+    // Using v1alpha as it is the standard for the Live API currently
+    const host = 'generativelanguage.googleapis.com'
+    const version = 'v1alpha'
+    const service = 'google.ai.generativelanguage.v1alpha.GenerativeService'
+    const method = 'BidiGenerateContent'
+    
+    const url = `wss://${host}/ws/${service}/${method}?key=${this.apiKey}`
+    
     console.log('GeminiLiveClient: Connecting to', url.replace(this.apiKey, 'API_KEY_HIDDEN'))
     
-    this.ws = new WebSocket(url)
+    try {
+      this.ws = new WebSocket(url)
+    } catch (e) {
+      console.error('GeminiLiveClient: Failed to create WebSocket', e)
+      this.onStatusChange?.('disconnected')
+      return
+    }
 
     this.ws.onopen = async () => {
       console.log('GeminiLiveClient: WebSocket connected')
@@ -89,7 +101,7 @@ export class GeminiLiveClient {
         } else {
           data = JSON.parse(event.data)
         }
-        // console.log('GeminiLiveClient: Received message', data) // Uncomment for debugging
+        // console.log('GeminiLiveClient: Received message', data) 
         this.handleServerMessage(data)
       } catch (e) {
         console.error('GeminiLiveClient: Error parsing message:', e)
@@ -124,7 +136,7 @@ export class GeminiLiveClient {
       }
     }
 
-    console.log('GeminiLiveClient: Sending setup message', JSON.stringify(setupMessage))
+    console.log('GeminiLiveClient: Sending setup message')
     this.ws.send(JSON.stringify(setupMessage))
   }
 
@@ -152,7 +164,12 @@ export class GeminiLiveClient {
       const blob = new Blob([GeminiLiveClient.WORKLET_CODE], { type: 'application/javascript' })
       const workletUrl = URL.createObjectURL(blob)
       
-      await this.audioContext.audioWorklet.addModule(workletUrl)
+      try {
+        await this.audioContext.audioWorklet.addModule(workletUrl)
+      } catch (e) {
+        console.error('GeminiLiveClient: Failed to add AudioWorklet module', e)
+        throw e
+      }
       
       const source = this.audioContext.createMediaStreamSource(this.mediaStream)
       this.workletNode = new AudioWorkletNode(this.audioContext, 'audio-processor')
@@ -162,7 +179,6 @@ export class GeminiLiveClient {
       }
 
       source.connect(this.workletNode)
-      // this.workletNode.connect(this.audioContext.destination) // Don't connect to destination to avoid self-loop echo
     } catch (error) {
       console.error('GeminiLiveClient: Failed to start audio input:', error)
     }
@@ -171,15 +187,13 @@ export class GeminiLiveClient {
   private processAudioInput(float32Data: Float32Array) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return
 
-    // Downsample to 16kHz if needed (AudioContext might not be exactly 16kHz)
-    // Convert Float32 to Int16 PCM
+    // Downsample to 16kHz if needed
     const pcm16 = new Int16Array(float32Data.length)
     for (let i = 0; i < float32Data.length; i++) {
       const s = Math.max(-1, Math.min(1, float32Data[i]))
       pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF
     }
 
-    // Convert to Base64
     const base64Audio = this.arrayBufferToBase64(pcm16.buffer)
 
     const message = {
@@ -195,30 +209,22 @@ export class GeminiLiveClient {
   }
 
   private handleServerMessage(data: any) {
-    // Handle server content (Audio Output)
     if (data.serverContent?.modelTurn?.parts) {
       for (const part of data.serverContent.modelTurn.parts) {
         if (part.inlineData && part.inlineData.mimeType.startsWith('audio/pcm')) {
           const pcmData = this.base64ToArrayBuffer(part.inlineData.data)
           this.playAudioChunk(pcmData)
         }
-        // Handle text if provided (for transcript)
         if (part.text) {
           this.onTextData?.(part.text)
         }
       }
-    }
-    
-    // Handle turnComplete or other signals
-    if (data.serverContent?.turnComplete) {
-      // console.log('Turn complete')
     }
   }
 
   private playAudioChunk(pcmData: ArrayBuffer) {
     if (!this.audioContext) return
 
-    // Gemini output is usually 24kHz PCM Int16
     const int16Array = new Int16Array(pcmData)
     const float32Array = new Float32Array(int16Array.length)
     
@@ -226,7 +232,6 @@ export class GeminiLiveClient {
       float32Array[i] = int16Array[i] / 32768.0
     }
 
-    // Queue audio for playback
     this.audioQueue.push(float32Array)
     if (!this.isPlaying) {
       this.playQueue()
@@ -241,7 +246,7 @@ export class GeminiLiveClient {
 
     this.isPlaying = true
     const audioData = this.audioQueue.shift()!
-    const buffer = this.audioContext.createBuffer(1, audioData.length, 24000) // Gemini output is 24kHz
+    const buffer = this.audioContext.createBuffer(1, audioData.length, 24000) 
     buffer.getChannelData(0).set(audioData)
 
     const source = this.audioContext.createBufferSource()
@@ -260,8 +265,8 @@ export class GeminiLiveClient {
   }
 
   disconnect() {
-    console.log('GeminiLiveClient: Disconnecting')
     this.isConnected = false
+    this.onStatusChange?.('disconnected')
     
     if (this.ws) {
       this.ws.close()
