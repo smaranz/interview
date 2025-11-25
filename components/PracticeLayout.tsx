@@ -133,14 +133,16 @@ Speak naturally as if in a real video call.`
         systemInstruction
       })
 
-      liveClientRef.current.setHandlers(
-        (status) => setConnectionStatus(status),
-        undefined, // Audio handling is internal
-        (text) => {
-          // Add AI transcript to chat (optional, if API sends text)
-          // Note: The Bidi API usually sends audio, text might be null or separate
-        }
-      )
+      // Set handlers as properties
+      liveClientRef.current.onStatusChange = (status) => setConnectionStatus(status)
+      liveClientRef.current.onTextData = (text) => {
+        // Add AI transcript to chat (optional, if API sends text)
+        // Note: The Bidi API usually sends audio, text might be null or separate
+      }
+      liveClientRef.current.onError = (error) => {
+        console.error('Gemini Live error:', error)
+        setConnectionStatus('disconnected')
+      }
     }
 
     await liveClientRef.current.connect()
