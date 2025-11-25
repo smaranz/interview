@@ -27,11 +27,11 @@ export default async function DashboardPage() {
   ) || []
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Dashboard</h1>
-          <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="mt-1 text-muted-foreground">
             Manage your interviews and practice sessions
           </p>
         </div>
@@ -40,11 +40,11 @@ export default async function DashboardPage() {
           <div className="lg:col-span-2 space-y-8">
             <section>
               <div className="mb-4 flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                <Calendar className="h-5 w-5" />
+                <h2 className="text-lg font-semibold">
                   Upcoming Interviews
                 </h2>
-                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                   {upcomingInterviews.length}
                 </span>
               </div>
@@ -54,10 +54,10 @@ export default async function DashboardPage() {
             {pastInterviews.length > 0 && (
               <section>
                 <div className="mb-4 flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                  <h2 className="text-lg font-semibold">
                     Past Interviews
                   </h2>
-                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                     {pastInterviews.length}
                   </span>
                 </div>
@@ -68,8 +68,8 @@ export default async function DashboardPage() {
 
           <div>
             <div className="mb-4 flex items-center gap-2">
-              <Plus className="h-5 w-5 text-indigo-600" />
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              <Plus className="h-5 w-5" />
+              <h2 className="text-lg font-semibold">
                 New Interview
               </h2>
             </div>
@@ -80,4 +80,3 @@ export default async function DashboardPage() {
     </div>
   )
 }
-

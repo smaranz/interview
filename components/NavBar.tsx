@@ -33,15 +33,15 @@ export function NavBar({ user }: NavBarProps) {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-950/80">
+    <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600">
-                <Video className="h-5 w-5 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground">
+                <Video className="h-4 w-4 text-background" />
               </div>
-              <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              <span className="text-lg font-semibold tracking-tight">
                 Honest Hire
               </span>
             </Link>
@@ -55,10 +55,10 @@ export function NavBar({ user }: NavBarProps) {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                       isActive
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                        : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     )}
                   >
                     <Icon className="h-4 w-4" />
@@ -72,7 +72,7 @@ export function NavBar({ user }: NavBarProps) {
           <div className="hidden md:flex md:items-center md:gap-4">
             {user ? (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <span className="text-sm text-muted-foreground">
                   {user.email}
                 </span>
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
@@ -94,7 +94,7 @@ export function NavBar({ user }: NavBarProps) {
           
           <button
             type="button"
-            className="md:hidden rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            className="md:hidden rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -103,7 +103,7 @@ export function NavBar({ user }: NavBarProps) {
       </div>
       
       {mobileMenuOpen && (
-        <div className="border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 md:hidden">
+        <div className="border-t border-border bg-background md:hidden">
           <div className="space-y-1 px-4 py-3">
             {navigation.map((item) => {
               const Icon = item.icon
@@ -113,10 +113,10 @@ export function NavBar({ user }: NavBarProps) {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                      : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -126,11 +126,11 @@ export function NavBar({ user }: NavBarProps) {
               )
             })}
             
-            <div className="border-t border-zinc-200 pt-3 dark:border-zinc-800">
+            <div className="border-t border-border pt-3">
               {user ? (
                 <button
                   onClick={handleSignOut}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                   <LogOut className="h-5 w-5" />
                   Sign out
@@ -152,4 +152,3 @@ export function NavBar({ user }: NavBarProps) {
     </nav>
   )
 }
-

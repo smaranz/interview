@@ -1,47 +1,22 @@
-'use client'
+import * as React from "react"
 
-import { forwardRef, type InputHTMLAttributes } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils"
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  error?: string
-}
-
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
-    
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
     return (
-      <div className="w-full">
-        {label && (
-          <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {label}
-          </label>
+      <input
+        type={type}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          className
         )}
-        <input
-          ref={ref}
-          id={inputId}
-          className={cn(
-            'w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors',
-            'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20',
-            'disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:opacity-50',
-            'dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500',
-            'dark:focus:border-indigo-400 dark:focus:ring-indigo-400/20',
-            error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
-            className
-          )}
-          {...props}
-        />
-        {error && (
-          <p className="mt-1 text-sm text-red-500">{error}</p>
-        )}
-      </div>
+        ref={ref}
+        {...props}
+      />
     )
   }
 )
-
-Input.displayName = 'Input'
+Input.displayName = "Input"
 
 export { Input }
-

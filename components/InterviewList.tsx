@@ -15,11 +15,11 @@ interface InterviewListProps {
   interviews: Interview[]
 }
 
-const statusVariants: Record<Interview['status'], 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
-  scheduled: 'info',
-  in_progress: 'warning',
-  completed: 'success',
-  cancelled: 'danger',
+const statusVariants: Record<Interview['status'], 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  scheduled: 'secondary',
+  in_progress: 'default',
+  completed: 'outline',
+  cancelled: 'destructive',
 }
 
 const statusLabels: Record<Interview['status'], string> = {
@@ -47,13 +47,13 @@ export function InterviewList({ interviews }: InterviewListProps) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="mb-4 rounded-full bg-zinc-100 p-4 dark:bg-zinc-800">
-            <Calendar className="h-8 w-8 text-zinc-400" />
+          <div className="mb-4 rounded-full bg-secondary p-4">
+            <Calendar className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="mb-1 text-lg font-medium text-zinc-900 dark:text-zinc-100">
+          <h3 className="mb-1 text-lg font-medium">
             No interviews yet
           </h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             Create your first interview to get started
           </p>
         </CardContent>
@@ -64,23 +64,23 @@ export function InterviewList({ interviews }: InterviewListProps) {
   return (
     <div className="space-y-4">
       {interviews.map((interview) => (
-        <Card key={interview.id} className="transition-shadow hover:shadow-md">
-          <CardContent className="p-0">
-            <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <Card key={interview.id} className="transition-colors hover:bg-accent/50">
+          <CardContent className="p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                  <h3 className="font-semibold">
                     {interview.title}
                   </h3>
                   <Badge variant={statusVariants[interview.status]}>
                     {statusLabels[interview.status]}
                   </Badge>
-                  <Badge variant={interview.mode === 'live' ? 'info' : 'default'}>
+                  <Badge variant="outline">
                     {interview.mode === 'live' ? 'Live' : 'Practice'}
                   </Badge>
                 </div>
                 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <User className="h-4 w-4" />
                     {interview.candidate_email}
@@ -102,11 +102,12 @@ export function InterviewList({ interviews }: InterviewListProps) {
                     href={interview.meet_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
                   >
-                    <Video className="h-4 w-4" />
-                    Join Meet
-                    <ExternalLink className="h-3 w-3" />
+                    <Button variant="outline" size="sm">
+                      <Video className="mr-1.5 h-4 w-4" />
+                      Join Meet
+                      <ExternalLink className="ml-1.5 h-3 w-3" />
+                    </Button>
                   </a>
                 )}
                 
@@ -122,7 +123,7 @@ export function InterviewList({ interviews }: InterviewListProps) {
                   size="sm"
                   onClick={() => handleDelete(interview.id)}
                   disabled={deletingId === interview.id}
-                  className="text-zinc-400 hover:text-red-500"
+                  className="text-muted-foreground hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -134,4 +135,3 @@ export function InterviewList({ interviews }: InterviewListProps) {
     </div>
   )
 }
-

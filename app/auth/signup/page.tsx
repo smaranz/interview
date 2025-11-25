@@ -68,14 +68,14 @@ export default function SignUpPage() {
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-6">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-              <Mail className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+              <Mail className="h-6 w-6 text-secondary-foreground" />
             </div>
-            <h2 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h2 className="mb-2 text-xl font-semibold">
               Check your email
             </h2>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              We&apos;ve sent a confirmation link to <strong>{formData.email}</strong>. 
+            <p className="text-muted-foreground">
+              We&apos;ve sent a confirmation link to <strong className="text-foreground">{formData.email}</strong>. 
               Please click the link to verify your account.
             </p>
           </CardContent>
@@ -93,13 +93,13 @@ export default function SignUpPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600">
-            <Video className="h-6 w-6 text-white" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-foreground">
+            <Video className="h-6 w-6 text-background" />
           </div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h1 className="text-2xl font-bold">
             Create your account
           </h1>
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 text-muted-foreground">
             Start conducting better interviews today
           </p>
         </div>
@@ -109,10 +109,10 @@ export default function SignUpPage() {
             <CardTitle>Sign Up</CardTitle>
             <CardDescription>Create a new account</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form onSubmit={handleEmailSignUp} className="space-y-4">
               <div className="relative">
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Full name"
@@ -124,7 +124,7 @@ export default function SignUpPage() {
               </div>
               
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="email"
                   placeholder="Email address"
@@ -136,7 +136,7 @@ export default function SignUpPage() {
               </div>
               
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="password"
                   placeholder="Password (min 6 characters)"
@@ -149,20 +149,20 @@ export default function SignUpPage() {
               </div>
 
               {error && (
-                <p className="text-sm text-red-500">{error}</p>
+                <p className="text-sm text-destructive">{error}</p>
               )}
 
-              <Button type="submit" className="w-full" loading={loading}>
-                Create Account
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Creating account...' : 'Create Account'}
               </Button>
             </form>
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                <span className="bg-card px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
@@ -174,16 +174,15 @@ export default function SignUpPage() {
               className="w-full"
               onClick={handleGoogleSignUp}
               disabled={loading || googleLoading}
-              loading={googleLoading}
             >
               <Chrome className="mr-2 h-4 w-4" />
-              Continue with Google
+              {googleLoading ? 'Connecting...' : 'Continue with Google'}
             </Button>
           </CardContent>
           <CardFooter className="justify-center">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
-              <Link href="/auth/signin" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+              <Link href="/auth/signin" className="font-medium text-foreground hover:underline">
                 Sign in
               </Link>
             </p>
@@ -193,4 +192,3 @@ export default function SignUpPage() {
     </div>
   )
 }
-

@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createClient } from '@/lib/supabase/client'
 import { generateMockMeetUrl } from '@/lib/google'
 import type { InterviewMode } from '@/lib/supabase/types'
@@ -73,51 +73,62 @@ export function InterviewForm({ userId, onSuccess }: InterviewFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Interview Title"
-            placeholder="Frontend Developer Interview"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Interview Title</label>
+            <Input
+              placeholder="Frontend Developer Interview"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
           
-          <Input
-            label="Candidate Email"
-            type="email"
-            placeholder="candidate@example.com"
-            value={formData.candidate_email}
-            onChange={(e) => setFormData({ ...formData, candidate_email: e.target.value })}
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Candidate Email</label>
+            <Input
+              type="email"
+              placeholder="candidate@example.com"
+              value={formData.candidate_email}
+              onChange={(e) => setFormData({ ...formData, candidate_email: e.target.value })}
+              required
+            />
+          </div>
           
-          <Input
-            label="Scheduled Date & Time"
-            type="datetime-local"
-            value={formData.scheduled_at}
-            onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Scheduled Date & Time</label>
+            <Input
+              type="datetime-local"
+              value={formData.scheduled_at}
+              onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
+              required
+            />
+          </div>
           
-          <Select
-            label="Interview Mode"
-            value={formData.mode}
-            onChange={(e) => setFormData({ ...formData, mode: e.target.value as InterviewMode })}
-            options={[
-              { value: 'practice', label: 'Practice (AI Mock Interview)' },
-              { value: 'live', label: 'Live (Google Meet)' },
-            ]}
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Interview Mode</label>
+            <Select
+              value={formData.mode}
+              onValueChange={(value: InterviewMode) => setFormData({ ...formData, mode: value })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="practice">Practice (AI Mock Interview)</SelectItem>
+                <SelectItem value="live">Live (Google Meet)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           {error && (
-            <p className="text-sm text-red-500">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
           
-          <Button type="submit" loading={loading} className="w-full">
-            Create Interview
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? 'Creating...' : 'Create Interview'}
           </Button>
         </form>
       </CardContent>
     </Card>
   )
 }
-
