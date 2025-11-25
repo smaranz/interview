@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Send, Loader2 } from 'lucide-react'
+import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Send, Loader2, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { cheatDetectionService, type CheatEvent, type CheatMetrics } from '@/lib/cheat-detection'
@@ -11,6 +11,13 @@ interface AIMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+}
+
+// Helper for browser speech recognition
+const getSpeechRecognition = () => {
+  if (typeof window === 'undefined') return null
+  // @ts-ignore
+  return window.SpeechRecognition || window.webkitSpeechRecognition
 }
 
 export function PracticeLayout() {
@@ -25,10 +32,86 @@ export function PracticeLayout() {
   const [isLoading, setIsLoading] = useState(false)
   const [conversationHistory, setConversationHistory] = useState<{ role: string; content: string }[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
   
-  // Cheat detection state (hidden from user but tracked)
+  // Cheat detection state
   const [, setCheatMetrics] = useState<CheatMetrics | null>(null)
   const [cheatEvents, setCheatEvents] = useState<CheatEvent[]>([])
+
+  // Initialize speech recognition
+  useEffect(() => {
+    const SpeechRecognition = getSpeechRecognition()
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition()
+      recognition.continuous = false
+      recognition.interimResults = true
+      recognition.lang = 'en-US'
+
+      recognition.onstart = () => setIsListening(true)
+      recognition.onend = () => setIsListening(false)
+      
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0].transcript)
+          .join('')
+        setUserInput(transcript)
+      }
+
+      recognitionRef.current = recognition
+    }
+  }, [])
+
+  const speakResponse = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any current speech
+      window.speechSynthesis.cancel()
+
+      const utterance = new SpeechSynthesisUtterance(text)
+      
+      // Try to find a good voice
+      const voices = window.speechSynthesis.getVoices()
+      // Prefer Google US English or other high quality voices
+      const preferredVoice = voices.find(v => 
+        v.name.includes('Google US English') || 
+        v.name.includes('Samantha') || 
+        v.name.includes('Microsoft')
+      )
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice
+      }
+
+      utterance.rate = 1.0
+      utterance.pitch = 1.0
+      
+      utterance.onstart = () => setIsSpeaking(true)
+      utterance.onend = () => {
+        setIsSpeaking(false)
+        // Auto-start listening after AI finishes talking?
+        // startListening() 
+      }
+      
+      window.speechSynthesis.speak(utterance)
+    }
+  }
+
+  const startListening = () => {
+    if (recognitionRef.current && !isListening) {
+      try {
+        recognitionRef.current.start()
+      } catch (e) {
+        console.error('Speech recognition error:', e)
+      }
+    }
+  }
+
+  const stopListening = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop()
+    }
+  }
 
   const startMedia = useCallback(async () => {
     try {
@@ -81,12 +164,11 @@ export function PracticeLayout() {
     setIsSessionActive(true)
     setIsLoading(true)
     
-    // Start cheat detection (runs in background, not shown to user)
     cheatDetectionService.start(
       (metrics) => setCheatMetrics(metrics),
       (event) => {
         setCheatEvents(prev => [...prev, event])
-        console.log('Cheat event detected:', event) // Log for backend/analytics
+        console.log('Cheat event detected:', event)
       }
     )
 
@@ -108,17 +190,20 @@ export function PracticeLayout() {
         }
         setMessages([welcomeMessage])
         setConversationHistory([{ role: 'model', content: data.response }])
+        speakResponse(data.response)
       }
     } catch (error) {
       console.error('Failed to start interview:', error)
+      const fallbackText = "Hello! I'm your AI interviewer today. Let's start with a classic question: Tell me about yourself and what brings you here today."
       const fallbackMessage: AIMessage = {
         id: `ai-${Date.now()}`,
         role: 'assistant',
-        content: "Hello! I'm your AI interviewer today. Let's start with a classic question: Tell me about yourself and what brings you here today.",
+        content: fallbackText,
         timestamp: new Date(),
       }
       setMessages([fallbackMessage])
-      setConversationHistory([{ role: 'model', content: fallbackMessage.content }])
+      setConversationHistory([{ role: 'model', content: fallbackText }])
+      speakResponse(fallbackText)
     } finally {
       setIsLoading(false)
     }
@@ -127,8 +212,8 @@ export function PracticeLayout() {
   const endSession = () => {
     stopMedia()
     cheatDetectionService.stop()
+    window.speechSynthesis.cancel()
     
-    // Log final integrity data (would be sent to backend in production)
     const finalScore = cheatDetectionService.getIntegrityScore()
     console.log('Session ended. Integrity score:', finalScore)
     console.log('Cheat events:', cheatEvents)
@@ -141,6 +226,8 @@ export function PracticeLayout() {
 
   const handleSendMessage = async () => {
     if (!userInput.trim() || isLoading) return
+
+    stopListening() // Ensure we stop listening when sending
 
     const userMessage: AIMessage = {
       id: `user-${Date.now()}`,
@@ -179,20 +266,30 @@ export function PracticeLayout() {
           { role: 'user', content: currentInput },
           { role: 'model', content: data.response },
         ])
+        speakResponse(data.response)
       }
     } catch (error) {
       console.error('Failed to get AI response:', error)
+      const errorText = "I apologize, but I'm having trouble responding right now. Please try again."
       const errorMessage: AIMessage = {
         id: `ai-${Date.now()}`,
         role: 'assistant',
-        content: "I apologize, but I'm having trouble responding right now. Please try again.",
+        content: errorText,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
+      speakResponse(errorText)
     } finally {
       setIsLoading(false)
     }
   }
+
+  // Clean up speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel()
+    }
+  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -216,7 +313,9 @@ export function PracticeLayout() {
             Ready to Practice?
           </h2>
           <p className="max-w-md text-neutral-400">
-            Start a mock interview session with our AI interviewer powered by Gemini. You&apos;ll need to allow camera and microphone access.
+            Start a mock interview session with our AI interviewer.
+            <br />
+            Please allow camera and microphone access for the best experience.
           </p>
         </div>
         <Button 
@@ -256,21 +355,39 @@ export function PracticeLayout() {
             </div>
           )}
 
+          {/* Speaking Indicator Overlay */}
+          {isSpeaking && (
+            <div className="absolute top-4 right-4 flex items-center gap-2 rounded-full bg-black/50 px-4 py-2 text-white backdrop-blur">
+              <Volume2 className="h-4 w-4 animate-pulse" />
+              <span className="text-sm font-medium">AI Speaking...</span>
+            </div>
+          )}
+          
+          {/* Listening Indicator Overlay */}
+          {isListening && (
+            <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-red-500/80 px-4 py-2 text-white backdrop-blur">
+              <Mic className="h-4 w-4 animate-pulse" />
+              <span className="text-sm font-medium">Listening...</span>
+            </div>
+          )}
+
           {/* Controls overlay */}
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3">
-            <Button
+             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleAudio}
+              onClick={() => isListening ? stopListening() : startListening()}
               className={cn(
-                'h-12 w-12 rounded-full',
-                audioEnabled 
-                  ? 'bg-neutral-800 text-white hover:bg-neutral-700' 
-                  : 'bg-red-600 text-white hover:bg-red-700'
+                'h-12 w-12 rounded-full transition-colors',
+                isListening
+                  ? 'bg-red-500 text-white hover:bg-red-600 animate-pulse'
+                  : 'bg-neutral-800 text-white hover:bg-neutral-700'
               )}
+              title={isListening ? "Stop Listening" : "Start Listening"}
             >
-              {audioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+              {isListening ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
             </Button>
+
             <Button
               variant="ghost"
               size="icon"
