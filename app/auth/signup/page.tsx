@@ -28,7 +28,7 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
       options: {
@@ -45,7 +45,17 @@ export default function SignUpPage() {
       return
     }
 
-    setSuccess(true)
+    if (data.session) {
+      router.push('/dashboard')
+      router.refresh()
+    } else {
+      // Fallback if email confirmation is arguably still on, but user claims it's off
+      // If session is null but no error, it usually means email confirmation is required
+      // But user said it's off. If it's off, session should be present.
+      // We'll redirect to signin just in case.
+      router.push('/auth/signin') 
+    }
+    
     setLoading(false)
   }
 
