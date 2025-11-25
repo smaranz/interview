@@ -66,7 +66,7 @@ export default function SignInPage() {
             Welcome back
           </h1>
           <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Sign in to your ClearView account
+            Sign in to your Honest Hire account
           </p>
         </div>
 

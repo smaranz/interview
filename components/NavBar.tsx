@@ -42,7 +42,7 @@ export function NavBar({ user }: NavBarProps) {
                 <Video className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                ClearView
+                Honest Hire
               </span>
             </Link>
             

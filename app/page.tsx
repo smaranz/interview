@@ -19,12 +19,12 @@ export default function Home() {
             <h1 className="mb-6 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-5xl lg:text-6xl">
               Conduct Interviews with{' '}
               <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                Crystal Clarity
+                Honest Hiring
               </span>
           </h1>
             
             <p className="mb-10 text-lg text-zinc-600 dark:text-zinc-400 sm:text-xl">
-              ClearView combines AI-powered practice sessions, real-time integrity monitoring, 
+              Honest Hire combines AI-powered practice sessions, real-time integrity monitoring, 
               and seamless Google Meet integration to transform how you conduct interviews.
             </p>
             
@@ -81,7 +81,7 @@ export default function Home() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <h2 className="mb-6 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-                Why Choose ClearView?
+                Why Choose Honest Hire?
               </h2>
               <div className="space-y-4">
                 {[
@@ -137,11 +137,11 @@ export default function Home() {
               <Video className="h-4 w-4 text-white" />
             </div>
             <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              ClearView Interview
+              Honest Hire
             </span>
           </div>
           <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
-            © {new Date().getFullYear()} ClearView Interview. All rights reserved.
+            © {new Date().getFullYear()} Honest Hire. All rights reserved.
           </p>
         </div>
       </footer>

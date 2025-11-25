@@ -1,4 +1,4 @@
-# ClearView Interview
+# Honest Hire
 
 AI-powered interview platform with practice sessions, integrity monitoring, and Google Meet integration.
 
@@ -41,7 +41,7 @@ AI-powered interview platform with practice sessions, integrity monitoring, and 
 4. Go to **Credentials** > **Create Credentials** > **OAuth client ID**
 5. Configure the OAuth consent screen:
    - User Type: External (or Internal for G Suite)
-   - App name: ClearView Interview
+   - App name: Honest Hire
    - Authorized domains: Your domain (e.g., `yourdomain.com`)
 6. Create OAuth 2.0 Client ID:
    - Application type: Web application

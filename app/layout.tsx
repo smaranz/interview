@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'ClearView Interview | AI-Powered Interview Platform',
+  title: 'Honest Hire | AI-Powered Interview Platform',
   description: 'Conduct seamless interviews with AI-powered insights, cheat detection, and Google Meet integration.',
 }
 
