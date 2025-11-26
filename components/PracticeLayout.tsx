@@ -537,7 +537,9 @@ Speak naturally as if in a real video call interview.`
                   type="button"
                   onClick={() => {
                     const creditsNum = typeof credits === 'number' ? credits : 0
+                    console.log('10min button clicked, credits:', creditsNum)
                     if (creditsNum >= 15) {
+                      console.log('Setting duration to 10min')
                       setSelectedDuration('10min')
                     } else {
                       alert(`You need at least 15 credits for a 10-minute interview. You currently have ${creditsNum} credits.`)
@@ -545,7 +547,7 @@ Speak naturally as if in a real video call interview.`
                   }}
                   disabled={credits === null || (typeof credits === 'number' && credits < 15)}
                   className={cn(
-                    "rounded-lg border-2 p-4 text-left transition-all",
+                    "rounded-lg border-2 p-4 text-left transition-all cursor-pointer",
                     selectedDuration === '10min'
                       ? "border-white bg-white text-black"
                       : "border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-neutral-600",
@@ -559,7 +561,9 @@ Speak naturally as if in a real video call interview.`
                   type="button"
                   onClick={() => {
                     const creditsNum = typeof credits === 'number' ? credits : 0
+                    console.log('25min button clicked, credits:', creditsNum)
                     if (creditsNum >= 30) {
+                      console.log('Setting duration to 25min')
                       setSelectedDuration('25min')
                     } else {
                       alert(`You need at least 30 credits for a 25-minute interview. You currently have ${creditsNum} credits.`)
@@ -567,7 +571,7 @@ Speak naturally as if in a real video call interview.`
                   }}
                   disabled={credits === null || (typeof credits === 'number' && credits < 30)}
                   className={cn(
-                    "rounded-lg border-2 p-4 text-left transition-all",
+                    "rounded-lg border-2 p-4 text-left transition-all cursor-pointer",
                     selectedDuration === '25min'
                       ? "border-white bg-white text-black"
                       : "border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-neutral-600",
@@ -587,8 +591,24 @@ Speak naturally as if in a real video call interview.`
 
             <Button 
               size="lg" 
-              onClick={() => {
-                console.log('Start button clicked:', { jobUrl, selectedDuration })
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log('Start button clicked:', { 
+                  jobUrl: jobUrl.trim(), 
+                  selectedDuration,
+                  jobUrlLength: jobUrl.trim().length,
+                  hasJobUrl: !!jobUrl.trim(),
+                  hasDuration: !!selectedDuration
+                })
+                if (!jobUrl.trim()) {
+                  alert('Please enter a job application link.')
+                  return
+                }
+                if (!selectedDuration) {
+                  alert('Please select an interview duration.')
+                  return
+                }
                 startSession()
               }}
               disabled={!jobUrl.trim() || !selectedDuration}
@@ -598,8 +618,8 @@ Speak naturally as if in a real video call interview.`
             </Button>
             {(!jobUrl.trim() || !selectedDuration) && (
               <p className="text-xs text-neutral-500 mt-2">
-                {!jobUrl.trim() && 'Please enter a job application link. '}
-                {!selectedDuration && 'Please select an interview duration.'}
+                {!jobUrl.trim() && '⚠️ Please enter a job application link. '}
+                {!selectedDuration && '⚠️ Please select an interview duration.'}
               </p>
             )}
           </div>
