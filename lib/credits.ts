@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createProfileIfNotExists } from '@/lib/auth'
 
 export interface CreditInfo {
   credits: number
@@ -19,6 +20,13 @@ export async function getUserCredits(userId: string): Promise<number> {
   try {
     const supabase = await createClient()
     
+    // First, verify the user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user || user.id !== userId) {
+      console.error('Authentication error:', authError)
+      return 0
+    }
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('credits')
@@ -27,8 +35,20 @@ export async function getUserCredits(userId: string): Promise<number> {
     
     if (error) {
       console.error('Error fetching credits:', error)
-      // If profile doesn't exist, return 0 (default)
+      // If profile doesn't exist (PGRST116 = no rows returned), create it
       if (error.code === 'PGRST116') {
+        // Try to get user email to create profile
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        if (authUser?.email) {
+          await createProfileIfNotExists(userId, authUser.email)
+          // Retry fetching credits after creating profile
+          const { data: retryData } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', userId)
+            .single()
+          return retryData?.credits ?? 0
+        }
         return 0
       }
       throw error

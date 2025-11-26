@@ -59,6 +59,7 @@ export async function createProfileIfNotExists(userId: string, email: string, fu
       email,
       full_name: fullName ?? null,
       avatar_url: avatarUrl ?? null,
+      credits: 0, // Initialize with 0 credits
     })
     .select()
     .single()
