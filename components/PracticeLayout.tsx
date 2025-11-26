@@ -154,7 +154,19 @@ Speak naturally as if in a real video call.`
     } catch (err) {
       console.error('Failed to start realtime session:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
-      alert(`Failed to start the AI interview: ${errorMessage}\n\nPlease check:\n1. OpenAI API key is configured in Vercel\n2. Your browser console for more details`)
+      
+      // Provide more helpful error messages based on error type
+      let userMessage = `Failed to start the AI interview: ${errorMessage}`
+      
+      if (errorMessage.includes('Permission denied') || errorMessage.includes('Microphone permission')) {
+        userMessage = errorMessage // Use the detailed message from the client
+      } else if (errorMessage.includes('OPENAI_API_KEY') || errorMessage.includes('API key')) {
+        userMessage = `${errorMessage}\n\nPlease check:\n1. OpenAI API key is configured in Vercel environment variables\n2. The key is correct and has not expired`
+      } else {
+        userMessage = `${errorMessage}\n\nPlease check:\n1. Your browser console for more details\n2. OpenAI API key is configured in Vercel\n3. Your microphone permissions are granted`
+      }
+      
+      alert(userMessage)
       cheatDetectionService.stop()
       stopMedia()
       liveClientRef.current?.disconnect()

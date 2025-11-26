@@ -64,14 +64,32 @@ export class OpenAIRealtimeClient {
 
     try {
       // Step 1: Get local media stream FIRST (before creating peer connection)
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      })
+      try {
+        this.mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        })
+      } catch (mediaError) {
+        if (mediaError instanceof DOMException) {
+          if (mediaError.name === 'NotAllowedError' || mediaError.name === 'PermissionDeniedError') {
+            throw new Error(
+              'Microphone permission denied. Please:\n' +
+              '1. Click the microphone icon in your browser\'s address bar\n' +
+              '2. Select "Allow" for microphone access\n' +
+              '3. Refresh the page and try again'
+            )
+          } else if (mediaError.name === 'NotFoundError' || mediaError.name === 'DevicesNotFoundError') {
+            throw new Error('No microphone found. Please connect a microphone and try again.')
+          } else if (mediaError.name === 'NotReadableError' || mediaError.name === 'TrackStartError') {
+            throw new Error('Microphone is being used by another application. Please close other apps using the microphone and try again.')
+          }
+        }
+        throw mediaError
+      }
 
       // Step 2: Create peer connection
       this.pc = new RTCPeerConnection({
