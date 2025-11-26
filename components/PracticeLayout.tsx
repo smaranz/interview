@@ -444,25 +444,17 @@ Speak naturally as if in a real video call interview.`
               {credits !== null && !isLoadingCredits && (
                 <span className="text-neutral-400 text-sm" data-testid="credits-info">
                   ({(() => {
-                    // Ensure CREDIT_COSTS is available
-                    const cost25 = CREDIT_COSTS?.['25min'] ?? 30
-                    const cost10 = CREDIT_COSTS?.['10min'] ?? 15
+                    // Hardcode costs to ensure they're always available
+                    const cost25 = 30 // CREDIT_COSTS?.['25min'] ?? 30
+                    const cost10 = 15 // CREDIT_COSTS?.['10min'] ?? 15
                     
-                    // Debug logging
-                    if (typeof credits === 'number') {
-                      console.log('Evaluating interview duration:', {
-                        credits,
-                        cost25,
-                        cost10,
-                        'credits >= cost25': credits >= cost25,
-                        'credits >= cost10': credits >= cost10,
-                      })
-                    }
+                    // Ensure credits is a number
+                    const creditsNum = typeof credits === 'number' ? credits : 0
                     
-                    if (credits >= cost25) {
+                    if (creditsNum >= cost25) {
                       return '25 min'
                     }
-                    if (credits >= cost10) {
+                    if (creditsNum >= cost10) {
                       return '10 min'
                     }
                     return 'Insufficient'
