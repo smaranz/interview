@@ -29,6 +29,12 @@ export async function POST(request: NextRequest) {
       type: 'realtime',
       model: 'gpt-realtime-mini',
       audio: {
+        input: {
+          // Voice activity detection - only process audio when user is speaking
+          voice_activity_detection: {
+            threshold: 0.5, // Sensitivity threshold (0.0 to 1.0)
+          },
+        },
         output: {
           voice: 'marin',
         },

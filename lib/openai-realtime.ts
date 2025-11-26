@@ -339,7 +339,7 @@ export class OpenAIRealtimeClient {
       type: 'response.create',
       response: {
         instructions:
-          'Begin the interview by introducing yourself briefly and asking the first question based on the provided job description.',
+          'Begin the interview. First, introduce yourself as Alex: "Hi, I\'m Alex. I\'ll be conducting your interview today." Then ask the first question based on the job posting.',
         modalities: ['audio'], // Explicitly request audio output
       },
     })

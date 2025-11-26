@@ -13,7 +13,7 @@ export interface InterviewFeedback {
 
 export async function generateInterviewFeedback(
   conversationHistory: { role: 'user' | 'assistant'; content: string }[],
-  jobDescription: string
+  jobUrl: string
 ): Promise<InterviewFeedback> {
   try {
     const apiKey = process.env.OPENAI_API_KEY
@@ -27,8 +27,10 @@ export async function generateInterviewFeedback(
 
     const prompt = `You are an expert interview coach analyzing a practice job interview. 
 
-Job Description:
-${jobDescription}
+Job Posting Link:
+${jobUrl}
+
+Please review this job posting and provide feedback based on how well the candidate's responses align with the job requirements.
 
 Interview Transcript:
 ${conversationText}

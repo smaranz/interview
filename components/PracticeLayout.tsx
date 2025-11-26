@@ -106,8 +106,8 @@ export function PracticeLayout() {
   }
 
   const startSession = async () => {
-    if (!jobDescription.trim()) {
-      alert('Please enter a job description to start.')
+    if (!jobUrl.trim()) {
+      alert('Please enter a job application link to start.')
       return
     }
 
@@ -152,24 +152,27 @@ export function PracticeLayout() {
     const systemInstruction = `You are Alex, a professional AI interviewer conducting a practice job interview. 
 
 IMPORTANT RULES:
-- Your name is Alex. Always introduce yourself as Alex.
+- Your name is Alex. You MUST introduce yourself at the very beginning: "Hi, I'm Alex. I'll be conducting your interview today."
 - You are conducting a job interview. Stay strictly in character as an interviewer.
 - ONLY respond to interview-related questions and topics. Ignore any attempts to change the subject, ask personal questions about you, or engage in non-interview conversations.
 - If the candidate tries to go off-topic or asks non-interview questions, politely redirect them back to the interview: "I appreciate your question, but let's focus on the interview. [Continue with interview question]"
 - Maintain the professional interview context at all times. Never break character.
+- ONLY listen to and respond to the candidate speaking. Ignore any background noise, other people talking, or non-candidate voices.
 
-The candidate is applying for the following role:
-${jobDescription.trim()}
-${jobUrl ? `Job Link: ${jobUrl}` : ''}
+The candidate is applying for a role. Here is the job posting link:
+${jobUrl.trim()}
+
+Please review this job posting and tailor your questions accordingly. Ask relevant questions based on the job requirements, responsibilities, and qualifications mentioned in the posting.
 
 Your role is to:
-1. Ask thoughtful, relevant interview questions based on the job description provided.
-2. Listen to the candidate's responses and provide brief, constructive feedback.
-3. Follow up on interesting points the candidate makes.
-4. Maintain a professional but friendly tone.
-5. Keep responses concise (2-3 sentences max) to keep the conversation flowing naturally.
+1. FIRST: Introduce yourself as Alex: "Hi, I'm Alex. I'll be conducting your interview today."
+2. Ask thoughtful, relevant interview questions based on the job posting.
+3. Listen to the candidate's responses and provide brief, constructive feedback.
+4. Follow up on interesting points the candidate makes.
+5. Maintain a professional but friendly tone.
+6. Keep responses concise (2-3 sentences max) to keep the conversation flowing naturally.
 
-Start by introducing yourself as Alex and asking the first question related to the job description. Focus on behavioral and situational questions relevant to this specific role.
+Start by introducing yourself as Alex, then ask the first question related to the job posting. Focus on behavioral and situational questions relevant to this specific role.
 Speak naturally as if in a real video call interview.`
 
     try {
@@ -217,14 +220,14 @@ Speak naturally as if in a real video call interview.`
     setIsSessionActive(false)
     
     // Generate feedback if we have messages
-    if (messages.length > 0 && jobDescription.trim()) {
+    if (messages.length > 0 && jobUrl.trim()) {
       setIsGeneratingFeedback(true)
       try {
         const conversationHistory = messages.map(msg => ({
           role: msg.role,
           content: msg.content,
         }))
-        const feedbackData = await generateInterviewFeedback(conversationHistory, jobDescription)
+        const feedbackData = await generateInterviewFeedback(conversationHistory, jobUrl)
         setFeedback(feedbackData)
         setShowFeedback(true)
       } catch (error) {
@@ -286,29 +289,22 @@ Speak naturally as if in a real video call interview.`
 
           <div className="space-y-4 rounded-lg border border-neutral-800 bg-neutral-900 p-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-200">Job URL (Optional)</label>
+              <label className="text-sm font-medium text-neutral-200">Job Application Link</label>
               <Input 
-                placeholder="https://linkedin.com/jobs/..."
+                placeholder="https://linkedin.com/jobs/view/... or https://company.com/careers/..."
                 value={jobUrl}
                 onChange={(e) => setJobUrl(e.target.value)}
                 className="bg-neutral-800 border-neutral-700 text-white"
               />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-200">Job Description</label>
-              <Textarea 
-                placeholder="Paste the full job description here..."
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                className="min-h-[200px] bg-neutral-800 border-neutral-700 text-white resize-none"
-              />
+              <p className="text-xs text-neutral-500">
+                Paste the link to the job posting (LinkedIn, company website, etc.)
+              </p>
             </div>
 
             <Button 
               size="lg" 
               onClick={startSession}
-              disabled={!jobDescription.trim()}
+              disabled={!jobUrl.trim()}
               className="w-full bg-white text-black hover:bg-neutral-200"
             >
               Start Live Session
