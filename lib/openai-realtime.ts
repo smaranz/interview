@@ -38,6 +38,7 @@ export class OpenAIRealtimeClient {
 
   /**
    * Establishes a WebRTC session with OpenAI Realtime API.
+   * Follows the pattern from OpenAI Realtime API documentation.
    */
   async connect(instructions: string) {
     this.currentInstructions = instructions
@@ -61,13 +62,18 @@ export class OpenAIRealtimeClient {
     this.onStatusChange?.('connecting')
 
     try {
-      // Use window.RTCPeerConnection to ensure we're using the browser's implementation
-      const RTCPeerConnectionClass = window.RTCPeerConnection || (window as any).webkitRTCPeerConnection
-      if (!RTCPeerConnectionClass) {
-        throw new Error('RTCPeerConnection is not available in this browser')
-      }
+      // Step 1: Get local media stream FIRST (before creating peer connection)
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      })
 
-      this.pc = new RTCPeerConnectionClass({
+      // Step 2: Create peer connection
+      this.pc = new RTCPeerConnection({
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
       })
 
@@ -75,20 +81,27 @@ export class OpenAIRealtimeClient {
         throw new Error('Failed to create RTCPeerConnection')
       }
 
-      this.setupPeerConnectionHandlers()
-      await this.setupLocalMedia()
+      // Step 3: Set up audio output (remote audio from OpenAI)
+      this.setupAudioOutput()
+
+      // Step 4: Add local audio track to peer connection
+      this.mediaStream.getTracks().forEach((track) => {
+        if (this.pc) {
+          this.pc.addTrack(track, this.mediaStream as MediaStream)
+        }
+      })
+
+      // Step 5: Set up data channel for events
       this.setupDataChannel()
 
-      if (!this.pc) {
-        throw new Error('RTCPeerConnection was lost during setup')
-      }
+      // Step 6: Set up connection state handlers
+      this.setupPeerConnectionHandlers()
 
+      // Step 7: Create offer and set local description
       const offer = await this.pc.createOffer()
-      if (!this.pc) {
-        throw new Error('RTCPeerConnection was lost after creating offer')
-      }
       await this.pc.setLocalDescription(offer)
 
+      // Step 8: Send SDP offer to server
       const response = await fetch(this.config.sessionEndpoint, {
         method: 'POST',
         headers: {
@@ -112,10 +125,8 @@ export class OpenAIRealtimeClient {
         throw new Error(errorMessage)
       }
 
+      // Step 9: Set remote description from server response
       const answerSdp = await response.text()
-      if (!this.pc) {
-        throw new Error('RTCPeerConnection was lost before setting remote description')
-      }
       await this.pc.setRemoteDescription({
         type: 'answer',
         sdp: answerSdp,
@@ -181,9 +192,26 @@ export class OpenAIRealtimeClient {
     }
   }
 
+  private setupAudioOutput() {
+    if (!this.audioElement) {
+      this.audioElement = document.createElement('audio')
+      this.audioElement.autoplay = true
+      this.audioElement.style.display = 'none'
+      document.body.appendChild(this.audioElement)
+    }
+  }
+
   private setupPeerConnectionHandlers() {
     if (!this.pc) return
 
+    // Handle remote audio tracks from OpenAI
+    this.pc.ontrack = (event) => {
+      if (this.audioElement && event.streams[0]) {
+        this.audioElement.srcObject = event.streams[0]
+      }
+    }
+
+    // Handle connection state changes
     this.pc.onconnectionstatechange = () => {
       if (!this.pc) return
       if (this.pc.connectionState === 'connected') {
@@ -197,58 +225,12 @@ export class OpenAIRealtimeClient {
       }
     }
 
+    // Handle ICE connection state changes
     this.pc.oniceconnectionstatechange = () => {
       if (!this.pc) return
       if (this.pc.iceConnectionState === 'failed') {
         this.onError?.(new Error('ICE connection failed'))
       }
-    }
-
-    this.pc.ontrack = (event) => {
-      if (!this.audioElement) {
-        this.audioElement = document.createElement('audio')
-        this.audioElement.autoplay = true
-        this.audioElement.style.display = 'none'
-        document.body.appendChild(this.audioElement)
-      }
-
-      if (this.audioElement && event.streams[0]) {
-        this.audioElement.srcObject = event.streams[0]
-      }
-    }
-  }
-
-  private async setupLocalMedia() {
-    if (!this.pc) {
-      throw new Error('RTCPeerConnection is not initialized')
-    }
-
-    try {
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      })
-
-      if (!this.pc) {
-        throw new Error('RTCPeerConnection was lost during media setup')
-      }
-
-      this.mediaStream.getTracks().forEach((track) => {
-        if (this.pc) {
-          this.pc.addTrack(track, this.mediaStream as MediaStream)
-        }
-      })
-    } catch (error) {
-      if (error instanceof Error && error.name === 'NotAllowedError') {
-        throw new Error('Microphone permission denied. Please allow microphone access and try again.')
-      } else if (error instanceof Error && error.name === 'NotFoundError') {
-        throw new Error('No microphone found. Please connect a microphone and try again.')
-      }
-      throw error
     }
   }
 
