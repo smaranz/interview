@@ -46,20 +46,47 @@ export class OpenAIRealtimeClient {
       throw new Error('Interview instructions are required.')
     }
 
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      throw new Error('This code must run in a browser environment')
+    }
+
+    // Check if RTCPeerConnection is available
+    if (typeof RTCPeerConnection === 'undefined' || !window.RTCPeerConnection) {
+      throw new Error('WebRTC is not supported in this browser. Please use a modern browser like Chrome, Firefox, or Safari.')
+    }
+
     // Ensure previous resources are released before starting a new session
     this.disconnect(false)
     this.onStatusChange?.('connecting')
 
     try {
-      this.pc = new RTCPeerConnection({
+      // Use window.RTCPeerConnection to ensure we're using the browser's implementation
+      const RTCPeerConnectionClass = window.RTCPeerConnection || (window as any).webkitRTCPeerConnection
+      if (!RTCPeerConnectionClass) {
+        throw new Error('RTCPeerConnection is not available in this browser')
+      }
+
+      this.pc = new RTCPeerConnectionClass({
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
       })
+
+      if (!this.pc) {
+        throw new Error('Failed to create RTCPeerConnection')
+      }
 
       this.setupPeerConnectionHandlers()
       await this.setupLocalMedia()
       this.setupDataChannel()
 
+      if (!this.pc) {
+        throw new Error('RTCPeerConnection was lost during setup')
+      }
+
       const offer = await this.pc.createOffer()
+      if (!this.pc) {
+        throw new Error('RTCPeerConnection was lost after creating offer')
+      }
       await this.pc.setLocalDescription(offer)
 
       const response = await fetch(this.config.sessionEndpoint, {
@@ -86,6 +113,9 @@ export class OpenAIRealtimeClient {
       }
 
       const answerSdp = await response.text()
+      if (!this.pc) {
+        throw new Error('RTCPeerConnection was lost before setting remote description')
+      }
       await this.pc.setRemoteDescription({
         type: 'answer',
         sdp: answerSdp,
@@ -189,22 +219,43 @@ export class OpenAIRealtimeClient {
   }
 
   private async setupLocalMedia() {
-    this.mediaStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        channelCount: 1,
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      },
-    })
+    if (!this.pc) {
+      throw new Error('RTCPeerConnection is not initialized')
+    }
 
-    this.mediaStream.getTracks().forEach((track) => {
-      this.pc?.addTrack(track, this.mediaStream as MediaStream)
-    })
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      })
+
+      if (!this.pc) {
+        throw new Error('RTCPeerConnection was lost during media setup')
+      }
+
+      this.mediaStream.getTracks().forEach((track) => {
+        if (this.pc) {
+          this.pc.addTrack(track, this.mediaStream as MediaStream)
+        }
+      })
+    } catch (error) {
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        throw new Error('Microphone permission denied. Please allow microphone access and try again.')
+      } else if (error instanceof Error && error.name === 'NotFoundError') {
+        throw new Error('No microphone found. Please connect a microphone and try again.')
+      }
+      throw error
+    }
   }
 
   private setupDataChannel() {
-    if (!this.pc) return
+    if (!this.pc) {
+      throw new Error('RTCPeerConnection is not initialized for data channel')
+    }
 
     this.dataChannel = this.pc.createDataChannel('oai-events')
 
