@@ -52,6 +52,7 @@ export function PracticeLayout({ userId }: PracticeLayoutProps) {
   // Credits state
   const [credits, setCredits] = useState<number | null>(null)
   const [isLoadingCredits, setIsLoadingCredits] = useState(false)
+  const [selectedDuration, setSelectedDuration] = useState<InterviewDuration | null>(null)
   const [interviewDuration, setInterviewDuration] = useState<InterviewDuration | null>(null)
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const interviewStartTimeRef = useRef<number | null>(null)
@@ -124,29 +125,31 @@ export function PracticeLayout({ userId }: PracticeLayoutProps) {
       return
     }
 
-    // Check credits and determine duration
+    if (!selectedDuration) {
+      alert('Please select an interview duration.')
+      return
+    }
+
+    // Check credits
     const creditInfo = await getCreditInfo(userId)
     setCredits(creditInfo.credits)
     
-    let duration: InterviewDuration | null = null
-    if (creditInfo.canStart25Min) {
-      duration = '25min'
-    } else if (creditInfo.canStart10Min) {
-      duration = '10min'
-    } else {
-      alert(`Insufficient credits. You need at least ${CREDIT_COSTS['10min']} credits to start an interview. You currently have ${creditInfo.credits} credits.`)
+    // Verify user has enough credits for selected duration
+    const requiredCredits = CREDIT_COSTS[selectedDuration]
+    if (creditInfo.credits < requiredCredits) {
+      alert(`Insufficient credits. You need at least ${requiredCredits} credits for a ${selectedDuration} interview. You currently have ${creditInfo.credits} credits.`)
       return
     }
 
     // Deduct credits
-    const deductResult = await deductCredits(userId, duration)
+    const deductResult = await deductCredits(userId, selectedDuration)
     if (!deductResult.success) {
       alert(deductResult.error || 'Failed to start interview. Please try again.')
       return
     }
     
     setCredits(deductResult.remainingCredits)
-    setInterviewDuration(duration)
+    setInterviewDuration(selectedDuration)
     interviewStartTimeRef.current = Date.now()
 
     await startMedia()
@@ -328,17 +331,17 @@ Speak naturally as if in a real video call interview.`
           console.log('Credits from API:', data.credits, 'Full response:', data)
           if (typeof data.credits === 'number') {
             console.log('Setting credits state to:', data.credits)
-            // Force state update
-            setCredits(() => {
-              console.log('State setter called with:', data.credits)
-              return data.credits
-            })
-            // Also set loading to false
+            setCredits(data.credits)
             setIsLoadingCredits(false)
-            // Force a small delay to ensure state updates
-            setTimeout(() => {
-              console.log('State after timeout - credits should be:', data.credits)
-            }, 100)
+            
+            // Auto-select duration if user has enough credits and nothing is selected
+            if (!selectedDuration) {
+              if (data.credits >= 30) {
+                setSelectedDuration('25min')
+              } else if (data.credits >= 15) {
+                setSelectedDuration('10min')
+              }
+            }
             return
           } else {
             console.error('Invalid credits value from API:', data.credits, typeof data.credits)
@@ -355,6 +358,15 @@ Speak naturally as if in a real video call interview.`
       const creditInfo = await getCreditInfo(userId)
       console.log('Credits fetched from server action:', creditInfo.credits)
       setCredits(creditInfo.credits)
+      
+      // Auto-select duration if user has enough credits and nothing is selected
+      if (!selectedDuration) {
+        if (creditInfo.canStart25Min) {
+          setSelectedDuration('25min')
+        } else if (creditInfo.canStart10Min) {
+          setSelectedDuration('10min')
+        }
+      }
     } catch (error) {
       console.error('Failed to fetch credits:', error)
       // Set to 0 on error so UI still shows something
@@ -493,11 +505,66 @@ Speak naturally as if in a real video call interview.`
               </p>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-200">Interview Duration</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const creditsNum = typeof credits === 'number' ? credits : 0
+                    if (creditsNum >= 15) {
+                      setSelectedDuration('10min')
+                    } else {
+                      alert(`You need at least 15 credits for a 10-minute interview. You currently have ${creditsNum} credits.`)
+                    }
+                  }}
+                  disabled={credits === null || (typeof credits === 'number' && credits < 15)}
+                  className={cn(
+                    "rounded-lg border-2 p-4 text-left transition-all",
+                    selectedDuration === '10min'
+                      ? "border-white bg-white text-black"
+                      : "border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-neutral-600",
+                    (credits === null || (typeof credits === 'number' && credits < 15)) && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  <div className="font-semibold">10 Minutes</div>
+                  <div className="text-xs mt-1">15 credits</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const creditsNum = typeof credits === 'number' ? credits : 0
+                    if (creditsNum >= 30) {
+                      setSelectedDuration('25min')
+                    } else {
+                      alert(`You need at least 30 credits for a 25-minute interview. You currently have ${creditsNum} credits.`)
+                    }
+                  }}
+                  disabled={credits === null || (typeof credits === 'number' && credits < 30)}
+                  className={cn(
+                    "rounded-lg border-2 p-4 text-left transition-all",
+                    selectedDuration === '25min'
+                      ? "border-white bg-white text-black"
+                      : "border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-neutral-600",
+                    (credits === null || (typeof credits === 'number' && credits < 30)) && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  <div className="font-semibold">25 Minutes</div>
+                  <div className="text-xs mt-1">30 credits</div>
+                </button>
+              </div>
+              {selectedDuration && (
+                <p className="text-xs text-neutral-400">
+                  Selected: {selectedDuration === '10min' ? '10 minutes' : '25 minutes'} interview ({CREDIT_COSTS[selectedDuration]} credits)
+                </p>
+              )}
+            </div>
+
             <Button 
               size="lg" 
               onClick={startSession}
-              disabled={!jobUrl.trim()}
-              className="w-full bg-white text-black hover:bg-neutral-200"
+              disabled={!jobUrl.trim() || !selectedDuration}
+              className="w-full bg-white text-black hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Start Live Session
             </Button>
