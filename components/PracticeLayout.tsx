@@ -335,13 +335,13 @@ Speak naturally as if in a real video call interview.`
             setIsLoadingCredits(false)
             
             // Auto-select duration if user has enough credits and nothing is selected
-            if (!selectedDuration) {
-              if (data.credits >= 30) {
-                setSelectedDuration('25min')
-              } else if (data.credits >= 15) {
-                setSelectedDuration('10min')
-              }
-            }
+            // Use functional update to avoid dependency issues
+            setSelectedDuration((current) => {
+              if (current) return current // Don't change if already selected
+              if (data.credits >= 30) return '25min'
+              if (data.credits >= 15) return '10min'
+              return null
+            })
             return
           } else {
             console.error('Invalid credits value from API:', data.credits, typeof data.credits)
@@ -360,13 +360,13 @@ Speak naturally as if in a real video call interview.`
       setCredits(creditInfo.credits)
       
       // Auto-select duration if user has enough credits and nothing is selected
-      if (!selectedDuration) {
-        if (creditInfo.canStart25Min) {
-          setSelectedDuration('25min')
-        } else if (creditInfo.canStart10Min) {
-          setSelectedDuration('10min')
-        }
-      }
+      // Use functional update to avoid dependency issues
+      setSelectedDuration((current) => {
+        if (current) return current // Don't change if already selected
+        if (creditInfo.canStart25Min) return '25min'
+        if (creditInfo.canStart10Min) return '10min'
+        return null
+      })
     } catch (error) {
       console.error('Failed to fetch credits:', error)
       // Set to 0 on error so UI still shows something
