@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Menu, X, Video, LayoutDashboard, PlayCircle, LogOut } from 'lucide-react'
+import { Menu, X, Video, LayoutDashboard, PlayCircle, LogOut, DollarSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
@@ -23,8 +23,11 @@ export function NavBar({ user }: NavBarProps) {
     ? [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Practice', href: '/practice', icon: PlayCircle },
+        { name: 'Pricing', href: '/pricing', icon: DollarSign },
       ]
-    : []
+    : [
+        { name: 'Pricing', href: '/pricing', icon: DollarSign },
+      ]
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
