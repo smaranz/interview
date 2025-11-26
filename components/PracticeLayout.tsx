@@ -153,7 +153,8 @@ Speak naturally as if in a real video call.`
       await liveClientRef.current.connect(systemInstruction)
     } catch (err) {
       console.error('Failed to start realtime session:', err)
-      alert('Failed to start the AI interview. Please ensure your microphone is accessible and try again.')
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      alert(`Failed to start the AI interview: ${errorMessage}\n\nPlease check:\n1. OpenAI API key is configured in Vercel\n2. Your browser console for more details`)
       cheatDetectionService.stop()
       stopMedia()
       liveClientRef.current?.disconnect()

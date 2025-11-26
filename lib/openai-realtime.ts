@@ -71,7 +71,18 @@ export class OpenAIRealtimeClient {
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to create realtime session (${response.status})`)
+        const errorText = await response.text()
+        let errorMessage = `Failed to create realtime session (${response.status})`
+        try {
+          const errorJson = JSON.parse(errorText)
+          errorMessage = errorJson.error || errorMessage
+        } catch {
+          // If not JSON, use the text or default message
+          if (errorText) {
+            errorMessage = errorText.length > 200 ? errorMessage : errorText
+          }
+        }
+        throw new Error(errorMessage)
       }
 
       const answerSdp = await response.text()
