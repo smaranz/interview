@@ -19,8 +19,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const supabase = await createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    user = authUser
+  } catch (error) {
+    // Silently fail - user will be null and NavBar will handle it
+    console.error('Error getting user in layout:', error)
+  }
 
   return (
     <html lang="en" className="dark">
