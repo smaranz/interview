@@ -25,16 +25,11 @@ export async function POST(request: NextRequest) {
     
     // Note: Instructions will be sent via data channel after connection
     // Initial session config just sets up the model and voice
+    // Voice activity detection should be configured via data channel, not in initial config
     const sessionConfig = {
       type: 'realtime',
       model: 'gpt-realtime-mini',
       audio: {
-        input: {
-          // Voice activity detection - only process audio when user is speaking
-          voice_activity_detection: {
-            threshold: 0.5, // Sensitivity threshold (0.0 to 1.0)
-          },
-        },
         output: {
           voice: 'marin',
         },

@@ -304,12 +304,17 @@ export class OpenAIRealtimeClient {
       console.log('Data channel opened, sending session update')
       this.sessionReady = false
       
-      // Update session with instructions
+      // Update session with instructions and voice activity detection
       this.sendEvent({
         type: 'session.update',
         session: {
           type: 'realtime',
           instructions: this.currentInstructions,
+          audio: {
+            voice_activity_detection: {
+              enabled: true,
+            },
+          },
         },
       })
     }
