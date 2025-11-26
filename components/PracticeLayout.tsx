@@ -402,6 +402,11 @@ Speak naturally as if in a real video call interview.`
     fetchCredits()
   }, [fetchCredits])
 
+  // Debug: Log when selectedDuration changes
+  useEffect(() => {
+    console.log('selectedDuration changed to:', selectedDuration)
+  }, [selectedDuration])
+
   // Debug: Log when credits state changes
   useEffect(() => {
     console.log('Credits state changed to:', credits, 'isLoadingCredits:', isLoadingCredits)
