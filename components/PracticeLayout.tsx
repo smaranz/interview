@@ -50,6 +50,14 @@ export function PracticeLayout() {
       setStream(mediaStream)
     } catch (error) {
       console.error('Failed to access media devices:', error)
+      // Don't show alert here - let connect() handle it with better error messages
+      // Just log it so we know what happened
+      if (error instanceof DOMException) {
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+          // Permission was denied - connect() will request again with better error message
+          console.warn('Media permission denied in startMedia, will retry in connect()')
+        }
+      }
     }
   }, [])
 
@@ -150,7 +158,8 @@ Start by introducing yourself briefly and asking the first question related to t
 Speak naturally as if in a real video call.`
 
     try {
-      await liveClientRef.current.connect(systemInstruction)
+      // Pass the existing stream to reuse the audio track (avoids requesting permission twice)
+      await liveClientRef.current.connect(systemInstruction, stream)
     } catch (err) {
       console.error('Failed to start realtime session:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
