@@ -22,6 +22,7 @@ export class OpenAIRealtimeClient {
   }
   private currentInstructions = ''
   private activeResponse = ''
+  private sessionReady = false
 
   public onStatusChange?: (status: ConnectionStatus) => void
   public onTextData?: (text: string) => void
@@ -150,6 +151,7 @@ export class OpenAIRealtimeClient {
     }
 
     this.activeResponse = ''
+    this.sessionReady = false
 
     if (this.dataChannel) {
       try {
@@ -214,13 +216,32 @@ export class OpenAIRealtimeClient {
 
     // Handle remote audio tracks from OpenAI
     this.pc.ontrack = (event) => {
-      console.log('Received remote audio track:', event)
-      if (this.audioElement && event.streams[0]) {
-        this.audioElement.srcObject = event.streams[0]
-        // Force play
-        this.audioElement.play().catch(err => {
-          console.error('Failed to play remote audio:', err)
+      console.log('Received remote audio track:', event, 'Streams:', event.streams.length)
+      if (event.streams && event.streams.length > 0 && this.audioElement) {
+        const stream = event.streams[0]
+        console.log('Setting audio srcObject, tracks:', stream.getAudioTracks().length)
+        this.audioElement.srcObject = stream
+        
+        // Listen for when audio is ready
+        stream.getAudioTracks().forEach(track => {
+          console.log('Audio track:', track.id, 'enabled:', track.enabled, 'readyState:', track.readyState)
+          track.onended = () => console.log('Audio track ended')
+          track.onmute = () => console.log('Audio track muted')
+          track.onunmute = () => console.log('Audio track unmuted')
         })
+        
+        // Force play and log
+        this.audioElement.play()
+          .then(() => {
+            console.log('Audio element playing successfully')
+            console.log('Audio element volume:', this.audioElement?.volume)
+            console.log('Audio element muted:', this.audioElement?.muted)
+          })
+          .catch(err => {
+            console.error('Failed to play remote audio:', err)
+          })
+      } else {
+        console.warn('No streams in track event or audio element missing')
       }
     }
 
@@ -256,6 +277,7 @@ export class OpenAIRealtimeClient {
 
     this.dataChannel.onopen = () => {
       console.log('Data channel opened, sending session update')
+      this.sessionReady = false
       
       // Update session with instructions
       this.sendEvent({
@@ -265,11 +287,6 @@ export class OpenAIRealtimeClient {
           instructions: this.currentInstructions,
         },
       })
-
-      // Wait a bit for session to be ready, then start conversation
-      setTimeout(() => {
-        this.startConversation()
-      }, 500)
     }
 
     this.dataChannel.onmessage = (event) => {
@@ -287,12 +304,18 @@ export class OpenAIRealtimeClient {
   }
 
   private startConversation() {
+    if (!this.sessionReady) {
+      console.log('Session not ready yet, waiting for session.updated event')
+      return
+    }
+    
     console.log('Starting conversation, sending response.create')
     this.sendEvent({
       type: 'response.create',
       response: {
         instructions:
           'Begin the interview by introducing yourself briefly and asking the first question based on the provided job description.',
+        modalities: ['audio'], // Explicitly request audio output
       },
     })
   }
@@ -316,11 +339,30 @@ export class OpenAIRealtimeClient {
     }
 
     if (event.type === 'session.updated') {
-      console.log('Session updated successfully')
+      console.log('Session updated successfully, starting conversation')
+      this.sessionReady = true
+      // Now that session is ready, start the conversation
+      this.startConversation()
     }
 
     if (event.type === 'response.created') {
-      console.log('Response created, waiting for audio...')
+      console.log('Response created, waiting for audio...', event)
+    }
+
+    if (event.type === 'response.audio_transcript.delta') {
+      console.log('Audio transcript delta:', event)
+    }
+
+    if (event.type === 'response.audio_transcript.done') {
+      console.log('Audio transcript done:', event)
+    }
+
+    if (event.type === 'response.output_item.added') {
+      console.log('Output item added:', event)
+    }
+
+    if (event.type === 'response.output_item.done') {
+      console.log('Output item done:', event)
     }
 
     if (event.type === 'response.audio_transcript.delta' || event.type === 'response.audio_transcript.done') {
