@@ -117,15 +117,19 @@ export async function getCreditInfo(userId: string): Promise<CreditInfo> {
     const credits = await getUserCredits(userId)
     console.log('getCreditInfo: Got credits:', credits)
     
+    // Ensure credits is a valid number
+    const creditsNum = typeof credits === 'number' && !isNaN(credits) ? credits : 0
+    
     return {
-      credits,
-      canStart10Min: credits >= CREDIT_COSTS['10min'],
-      canStart25Min: credits >= CREDIT_COSTS['25min'],
+      credits: creditsNum,
+      canStart10Min: creditsNum >= CREDIT_COSTS['10min'],
+      canStart25Min: creditsNum >= CREDIT_COSTS['25min'],
     }
   } catch (error) {
     console.error('getCreditInfo: Exception:', error)
     if (error instanceof Error) {
       console.error('getCreditInfo: Error message:', error.message)
+      console.error('getCreditInfo: Error stack:', error.stack)
     }
     // Return default values on error - never throw
     return {
@@ -141,13 +145,31 @@ export async function deductCredits(
   duration: InterviewDuration
 ): Promise<{ success: boolean; remainingCredits: number; error?: string }> {
   try {
+    if (!userId) {
+      console.error('deductCredits: userId is required')
+      return {
+        success: false,
+        remainingCredits: 0,
+        error: 'User ID is required',
+      }
+    }
+
+    if (!duration || (duration !== '10min' && duration !== '25min')) {
+      console.error('deductCredits: Invalid duration:', duration)
+      return {
+        success: false,
+        remainingCredits: 0,
+        error: 'Invalid interview duration',
+      }
+    }
+
     const supabase = await createClient()
     const cost = CREDIT_COSTS[duration]
     
     // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user || user.id !== userId) {
-      console.error('Authentication error in deductCredits:', authError, 'User ID:', user?.id, 'Expected:', userId)
+      console.error('Authentication error in deductCredits:', authError?.message, 'User ID:', user?.id, 'Expected:', userId)
       return {
         success: false,
         remainingCredits: 0,
@@ -179,7 +201,7 @@ export async function deductCredits(
       .single()
     
     if (error) {
-      console.error('Error deducting credits:', error)
+      console.error('Error deducting credits:', error.code, error.message, error.details)
       return {
         success: false,
         remainingCredits: currentCredits,
