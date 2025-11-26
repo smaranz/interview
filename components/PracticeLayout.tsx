@@ -30,7 +30,6 @@ export function PracticeLayout() {
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('disconnected')
   
   // Setup state
-  const [jobDescription, setJobDescription] = useState('')
   const [jobUrl, setJobUrl] = useState('')
   
   const liveClientRef = useRef<OpenAIRealtimeClient | null>(null)
