@@ -443,7 +443,11 @@ Speak naturally as if in a real video call interview.`
               </span>
               {credits !== null && !isLoadingCredits && (
                 <span className="text-neutral-400 text-sm" data-testid="credits-info">
-                  ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
+                  ({(() => {
+                    if (credits >= CREDIT_COSTS['25min']) return '25 min'
+                    if (credits >= CREDIT_COSTS['10min']) return '10 min'
+                    return 'Insufficient'
+                  })()} interview available)
                 </span>
               )}
               <Button
