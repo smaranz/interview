@@ -216,10 +216,19 @@ export async function deductCredits(
     }
   } catch (error) {
     console.error('Exception in deductCredits:', error)
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      return {
+        success: false,
+        remainingCredits: 0,
+        error: `Failed to deduct credits: ${error.message}`,
+      }
+    }
     return {
       success: false,
       remainingCredits: 0,
-      error: 'Failed to deduct credits',
+      error: 'An unexpected error occurred during credit deduction.',
     }
   }
 }
