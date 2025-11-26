@@ -305,27 +305,30 @@ Speak naturally as if in a real video call interview.`
     setMessages([])
   }
 
-  // Fetch credits on mount
-  useEffect(() => {
+  // Fetch credits function
+  const fetchCredits = useCallback(async () => {
     if (!userId) {
       console.warn('No userId provided, cannot fetch credits')
       setCredits(0)
       return
     }
     
-    const fetchCredits = async () => {
-      try {
-        const creditInfo = await getCreditInfo(userId)
-        setCredits(creditInfo.credits)
-        console.log('Credits loaded:', creditInfo.credits)
-      } catch (error) {
-        console.error('Failed to fetch credits:', error)
-        // Set to 0 on error so UI still shows something
-        setCredits(0)
-      }
+    try {
+      console.log('Fetching credits for userId:', userId)
+      const creditInfo = await getCreditInfo(userId)
+      console.log('Credits fetched:', creditInfo.credits)
+      setCredits(creditInfo.credits)
+    } catch (error) {
+      console.error('Failed to fetch credits:', error)
+      // Set to 0 on error so UI still shows something
+      setCredits(0)
     }
-    fetchCredits()
   }, [userId])
+
+  // Fetch credits on mount
+  useEffect(() => {
+    fetchCredits()
+  }, [fetchCredits])
 
   // Timer for interview duration
   useEffect(() => {
@@ -387,13 +390,22 @@ Speak naturally as if in a real video call interview.`
             <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2">
               <Star className="h-5 w-5 text-yellow-400 fill-current" />
               <span className="text-white font-medium">
-                {credits !== null ? `${credits} Credits` : 'Loading...'}
+                {credits !== null ? `${credits.toLocaleString()} Credits` : 'Loading...'}
               </span>
               {credits !== null && (
                 <span className="text-neutral-400 text-sm">
                   ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
                 </span>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={fetchCredits}
+                className="ml-auto text-xs h-6 px-2"
+                title="Refresh credits"
+              >
+                ↻
+              </Button>
             </div>
           </div>
 

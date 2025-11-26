@@ -23,13 +23,14 @@ export async function getUserCredits(userId: string): Promise<number> {
     // First, verify the user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user || user.id !== userId) {
-      console.error('Authentication error:', authError)
+      console.error('Authentication error:', authError, 'User ID:', user?.id, 'Expected:', userId)
       return 0
     }
     
+    console.log('Fetching credits from database for userId:', userId)
     const { data, error } = await supabase
       .from('profiles')
-      .select('credits')
+      .select('credits, email')
       .eq('id', userId)
       .single()
     
@@ -47,6 +48,7 @@ export async function getUserCredits(userId: string): Promise<number> {
             .select('credits')
             .eq('id', userId)
             .single()
+          console.log('Credits after profile creation:', retryData?.credits)
           return retryData?.credits ?? 0
         }
         return 0
@@ -54,6 +56,7 @@ export async function getUserCredits(userId: string): Promise<number> {
       throw error
     }
     
+    console.log('Credits from database:', data?.credits, 'Email:', data?.email)
     return data?.credits ?? 0
   } catch (error) {
     console.error('Failed to get user credits:', error)
