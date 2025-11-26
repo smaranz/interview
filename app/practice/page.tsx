@@ -20,7 +20,7 @@ export default async function PracticePage() {
           </p>
         </div>
 
-        <PracticeLayout />
+        <PracticeLayout userId={user.id} />
       </div>
     </div>
   )

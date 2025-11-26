@@ -10,6 +10,8 @@ import { cheatDetectionService, type CheatEvent, type CheatMetrics } from '@/lib
 import { OpenAIRealtimeClient } from '@/lib/openai-realtime'
 import { generateInterviewFeedback, type InterviewFeedback } from '@/lib/interview-feedback'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getCreditInfo, deductCredits, type InterviewDuration, CREDIT_COSTS } from '@/lib/credits'
+import { Clock } from 'lucide-react'
 
 interface AIMessage {
   id: string
@@ -18,7 +20,11 @@ interface AIMessage {
   timestamp: Date
 }
 
-export function PracticeLayout() {
+interface PracticeLayoutProps {
+  userId: string
+}
+
+export function PracticeLayout({ userId }: PracticeLayoutProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
@@ -42,6 +48,13 @@ export function PracticeLayout() {
   const [feedback, setFeedback] = useState<InterviewFeedback | null>(null)
   const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  
+  // Credits state
+  const [credits, setCredits] = useState<number | null>(null)
+  const [interviewDuration, setInterviewDuration] = useState<InterviewDuration | null>(null)
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
+  const interviewStartTimeRef = useRef<number | null>(null)
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const startMedia = useCallback(async () => {
     try {
@@ -109,6 +122,31 @@ export function PracticeLayout() {
       alert('Please enter a job application link to start.')
       return
     }
+
+    // Check credits and determine duration
+    const creditInfo = await getCreditInfo(userId)
+    setCredits(creditInfo.credits)
+    
+    let duration: InterviewDuration | null = null
+    if (creditInfo.canStart25Min) {
+      duration = '25min'
+    } else if (creditInfo.canStart10Min) {
+      duration = '10min'
+    } else {
+      alert(`Insufficient credits. You need at least ${CREDIT_COSTS['10min']} credits to start an interview. You currently have ${creditInfo.credits} credits.`)
+      return
+    }
+
+    // Deduct credits
+    const deductResult = await deductCredits(userId, duration)
+    if (!deductResult.success) {
+      alert(deductResult.error || 'Failed to start interview. Please try again.')
+      return
+    }
+    
+    setCredits(deductResult.remainingCredits)
+    setInterviewDuration(duration)
+    interviewStartTimeRef.current = Date.now()
 
     await startMedia()
     setIsSessionActive(true)
@@ -212,11 +250,20 @@ Speak naturally as if in a real video call interview.`
       liveClientRef.current = null
     }
     
+    // Clear timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
+    
     const finalScore = cheatDetectionService.getIntegrityScore()
     console.log('Session ended. Integrity score:', finalScore)
     console.log('Cheat events:', cheatEvents)
     
     setIsSessionActive(false)
+    setInterviewDuration(null)
+    interviewStartTimeRef.current = null
+    setTimeRemaining(null)
     
     // Generate feedback if we have messages
     if (messages.length > 0 && jobUrl.trim()) {
@@ -258,6 +305,50 @@ Speak naturally as if in a real video call interview.`
     setMessages([])
   }
 
+  // Fetch credits on mount
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const creditInfo = await getCreditInfo(userId)
+        setCredits(creditInfo.credits)
+      } catch (error) {
+        console.error('Failed to fetch credits:', error)
+      }
+    }
+    fetchCredits()
+  }, [userId])
+
+  // Timer for interview duration
+  useEffect(() => {
+    if (isSessionActive && interviewDuration && interviewStartTimeRef.current) {
+      const durationMs = interviewDuration === '10min' ? 10 * 60 * 1000 : 25 * 60 * 1000
+      
+      timerIntervalRef.current = setInterval(() => {
+        const elapsed = Date.now() - interviewStartTimeRef.current!
+        const remaining = Math.max(0, durationMs - elapsed)
+        setTimeRemaining(Math.floor(remaining / 1000))
+        
+        if (remaining <= 0) {
+          // Time's up - end the interview
+          endSession()
+        }
+      }, 1000)
+      
+      return () => {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current)
+        }
+      }
+    } else {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
+      }
+      setTimeRemaining(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSessionActive, interviewDuration])
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -282,8 +373,17 @@ Speak naturally as if in a real video call interview.`
               Setup Interview Context
             </h2>
             <p className="text-neutral-400">
-              Paste the job description from LinkedIn to tailor the AI interview.
+              Paste the job application link to tailor the AI interview.
             </p>
+            {credits !== null && (
+              <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2">
+                <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                <span className="text-white font-medium">{credits} Credits</span>
+                <span className="text-neutral-400 text-sm">
+                  ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 rounded-lg border border-neutral-800 bg-neutral-900 p-6">
@@ -354,6 +454,14 @@ Speak naturally as if in a real video call interview.`
                 {connectionStatus === 'connected' ? 'Live Voice Active' : 'Connecting...'}
               </span>
             </div>
+            {timeRemaining !== null && interviewDuration && (
+              <div className="flex items-center gap-2 rounded-full px-4 py-2 bg-blue-500/80 text-white backdrop-blur">
+                <Clock className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')} remaining
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Controls overlay */}
