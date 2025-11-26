@@ -18,16 +18,33 @@ export type InterviewDuration = '10min' | '25min'
 
 export async function getUserCredits(userId: string): Promise<number> {
   try {
+    if (!userId) {
+      console.error('getUserCredits: userId is required')
+      return 0
+    }
+
     const supabase = await createClient()
     
     // First, verify the user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || user.id !== userId) {
-      console.error('Authentication error:', authError, 'User ID:', user?.id, 'Expected:', userId)
+    if (authError) {
+      console.error('getUserCredits: Auth error:', authError.message, authError.status)
       return 0
     }
     
-    console.log('Fetching credits from database for userId:', userId)
+    if (!user) {
+      console.error('getUserCredits: No authenticated user')
+      return 0
+    }
+    
+    if (user.id !== userId) {
+      console.error('getUserCredits: User ID mismatch. Auth user:', user.id, 'Expected:', userId)
+      return 0
+    }
+    
+    console.log('getUserCredits: Fetching credits from database for userId:', userId)
+    
+    // Try to fetch credits
     const { data, error } = await supabase
       .from('profiles')
       .select('credits, email')
@@ -35,31 +52,52 @@ export async function getUserCredits(userId: string): Promise<number> {
       .single()
     
     if (error) {
-      console.error('Error fetching credits:', error)
+      console.error('getUserCredits: Database error:', error.code, error.message, error.details)
+      
       // If profile doesn't exist (PGRST116 = no rows returned), create it
       if (error.code === 'PGRST116') {
+        console.log('getUserCredits: Profile not found, creating...')
         // Try to get user email to create profile
-        const { data: { user: authUser } } = await supabase.auth.getUser()
-        if (authUser?.email) {
-          await createProfileIfNotExists(userId, authUser.email)
-          // Retry fetching credits after creating profile
-          const { data: retryData } = await supabase
-            .from('profiles')
-            .select('credits')
-            .eq('id', userId)
-            .single()
-          console.log('Credits after profile creation:', retryData?.credits)
-          return retryData?.credits ?? 0
+        if (user.email) {
+          const profile = await createProfileIfNotExists(userId, user.email)
+          if (profile) {
+            // Retry fetching credits after creating profile
+            const { data: retryData, error: retryError } = await supabase
+              .from('profiles')
+              .select('credits')
+              .eq('id', userId)
+              .single()
+            
+            if (retryError) {
+              console.error('getUserCredits: Error after profile creation:', retryError)
+              return 0
+            }
+            
+            console.log('getUserCredits: Credits after profile creation:', retryData?.credits)
+            return retryData?.credits ?? 0
+          }
         }
         return 0
       }
-      throw error
+      
+      // For other errors, log and return 0
+      console.error('getUserCredits: Unhandled database error:', error)
+      return 0
     }
     
-    console.log('Credits from database:', data?.credits, 'Email:', data?.email)
-    return data?.credits ?? 0
+    if (!data) {
+      console.error('getUserCredits: No data returned from query')
+      return 0
+    }
+    
+    console.log('getUserCredits: Success - Credits:', data.credits, 'Email:', data.email)
+    return data.credits ?? 0
   } catch (error) {
-    console.error('Failed to get user credits:', error)
+    console.error('getUserCredits: Exception:', error)
+    if (error instanceof Error) {
+      console.error('getUserCredits: Error message:', error.message)
+      console.error('getUserCredits: Error stack:', error.stack)
+    }
     return 0
   }
 }
@@ -67,10 +105,17 @@ export async function getUserCredits(userId: string): Promise<number> {
 export async function getCreditInfo(userId: string): Promise<CreditInfo> {
   try {
     if (!userId) {
-      throw new Error('User ID is required')
+      console.error('getCreditInfo: User ID is required')
+      return {
+        credits: 0,
+        canStart10Min: false,
+        canStart25Min: false,
+      }
     }
     
+    console.log('getCreditInfo: Getting credits for userId:', userId)
     const credits = await getUserCredits(userId)
+    console.log('getCreditInfo: Got credits:', credits)
     
     return {
       credits,
@@ -78,8 +123,11 @@ export async function getCreditInfo(userId: string): Promise<CreditInfo> {
       canStart25Min: credits >= CREDIT_COSTS['25min'],
     }
   } catch (error) {
-    console.error('Failed to get credit info:', error)
-    // Return default values on error
+    console.error('getCreditInfo: Exception:', error)
+    if (error instanceof Error) {
+      console.error('getCreditInfo: Error message:', error.message)
+    }
+    // Return default values on error - never throw
     return {
       credits: 0,
       canStart10Min: false,
