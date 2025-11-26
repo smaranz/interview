@@ -311,8 +311,11 @@ Speak naturally as if in a real video call interview.`
       try {
         const creditInfo = await getCreditInfo(userId)
         setCredits(creditInfo.credits)
+        console.log('Credits loaded:', creditInfo.credits)
       } catch (error) {
         console.error('Failed to fetch credits:', error)
+        // Set to 0 on error so UI still shows something
+        setCredits(0)
       }
     }
     fetchCredits()
@@ -375,15 +378,17 @@ Speak naturally as if in a real video call interview.`
             <p className="text-neutral-400">
               Paste the job application link to tailor the AI interview.
             </p>
-            {credits !== null && (
-              <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2">
-                <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                <span className="text-white font-medium">{credits} Credits</span>
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2">
+              <Star className="h-5 w-5 text-yellow-400 fill-current" />
+              <span className="text-white font-medium">
+                {credits !== null ? `${credits} Credits` : 'Loading...'}
+              </span>
+              {credits !== null && (
                 <span className="text-neutral-400 text-sm">
                   ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div className="space-y-4 rounded-lg border border-neutral-800 bg-neutral-900 p-6">
