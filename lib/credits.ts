@@ -1,12 +1,53 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { createProfileIfNotExists } from '@/lib/auth'
 
 export interface CreditInfo {
   credits: number
   canStart10Min: boolean
   canStart25Min: boolean
+}
+
+// Inline profile creation to avoid cross-module server action issues
+async function createProfileIfNotExists(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  email: string
+) {
+  try {
+    // Check if profile already exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id, credits')
+      .eq('id', userId)
+      .single()
+
+    if (existingProfile) {
+      return existingProfile
+    }
+
+    // Create new profile with 0 credits
+    const { data: newProfile, error: insertError } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        email,
+        credits: 0,
+      })
+      .select('id, credits')
+      .single()
+
+    if (insertError) {
+      console.error('Error creating profile:', insertError.code, insertError.message)
+      return null
+    }
+
+    console.log('Created new profile for user:', userId)
+    return newProfile
+  } catch (error) {
+    console.error('Exception creating profile:', error)
+    return null
+  }
 }
 
 const CREDIT_COSTS = {
@@ -59,22 +100,10 @@ export async function getUserCredits(userId: string): Promise<number> {
         console.log('getUserCredits: Profile not found, creating...')
         // Try to get user email to create profile
         if (user.email) {
-          const profile = await createProfileIfNotExists(userId, user.email)
+          const profile = await createProfileIfNotExists(supabase, userId, user.email)
           if (profile) {
-            // Retry fetching credits after creating profile
-            const { data: retryData, error: retryError } = await supabase
-              .from('profiles')
-              .select('credits')
-              .eq('id', userId)
-              .single()
-            
-            if (retryError) {
-              console.error('getUserCredits: Error after profile creation:', retryError)
-              return 0
-            }
-            
-            console.log('getUserCredits: Credits after profile creation:', retryData?.credits)
-            return retryData?.credits ?? 0
+            console.log('getUserCredits: Profile created, credits:', profile.credits)
+            return profile.credits ?? 0
           }
         }
         return 0
