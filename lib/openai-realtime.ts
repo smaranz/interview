@@ -340,13 +340,13 @@ export class OpenAIRealtimeClient {
     }
     
     console.log('Starting conversation, sending response.create')
-    // Create the first response - Alex should introduce himself and start the interview
+    // Create the first response - Alex introduces himself and starts the interview
+    // The system instructions already tell Alex what to do, so we just trigger the response
     this.sendEvent({
       type: 'response.create',
       response: {
-        instructions: `You are Alex, a professional interviewer. Your FIRST action must be to introduce yourself clearly: "Hi, I'm Alex. I'll be conducting your interview today. Let's start by having you introduce yourself and tell me a bit about your background." 
-
-After the candidate responds, ask your first interview question based on the job posting. Stay in character as an interviewer throughout.`,
+        // Don't override system instructions - just let Alex follow them
+        // The system instructions already tell Alex to introduce himself first
         modalities: ['audio'], // Explicitly request audio output
       },
     })
