@@ -130,6 +130,23 @@ export function PracticeLayout({ userId }: PracticeLayoutProps) {
       return
     }
 
+    // Fetch job posting content
+    let jobPostingContent = ''
+    try {
+      console.log('Fetching job posting content from:', jobUrl.trim())
+      const jobResponse = await fetch(`/api/fetch-job?url=${encodeURIComponent(jobUrl.trim())}`)
+      if (jobResponse.ok) {
+        const jobData = await jobResponse.json()
+        jobPostingContent = jobData.content || ''
+        console.log('Job posting content fetched, length:', jobPostingContent.length)
+      } else {
+        console.warn('Failed to fetch job posting content, will use URL only')
+      }
+    } catch (error) {
+      console.warn('Error fetching job posting:', error)
+      // Continue with just the URL if fetching fails
+    }
+
     try {
       // Try API route first (more reliable than server actions)
       const deductResponse = await fetch('/api/credits', {
@@ -243,18 +260,16 @@ ABSOLUTE RULES - NEVER VIOLATE THESE:
 6. You ask questions, they answer - that's how interviews work
 7. Stay in interviewer character 100% of the time
 
-JOB POSTING LINK (CRITICAL - YOU MUST USE THIS):
-${jobUrl.trim()}
+JOB POSTING INFORMATION:
+${jobPostingContent ? `Job Posting Content:\n${jobPostingContent}\n\nJob Posting URL: ${jobUrl.trim()}` : `Job Posting URL: ${jobUrl.trim()}\n\nNote: Use this URL to understand the job requirements. Ask questions about the role, responsibilities, required skills, and qualifications.`}
 
 IMPORTANT INSTRUCTIONS ABOUT THE JOB POSTING:
-- The job posting is at: ${jobUrl.trim()}
-- You MUST reference this job posting when asking questions
-- Ask questions about the specific role, requirements, and responsibilities mentioned in this posting
+- The candidate is applying for the position described above
+- You MUST use the job posting information to ask relevant interview questions
+- Ask questions about the specific role, requirements, and responsibilities mentioned
 - Tailor ALL your questions to this specific job position
 - Ask about relevant experience, skills, and qualifications for THIS role
 - Reference specific aspects of the job when asking follow-up questions
-
-The candidate is applying for the position described at: ${jobUrl.trim()}
 
 YOUR BEHAVIOR:
 - You are Alex, the interviewer
