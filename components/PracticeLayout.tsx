@@ -307,6 +307,12 @@ Speak naturally as if in a real video call interview.`
 
   // Fetch credits on mount
   useEffect(() => {
+    if (!userId) {
+      console.warn('No userId provided, cannot fetch credits')
+      setCredits(0)
+      return
+    }
+    
     const fetchCredits = async () => {
       try {
         const creditInfo = await getCreditInfo(userId)

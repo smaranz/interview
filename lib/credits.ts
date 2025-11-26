@@ -16,29 +16,52 @@ const CREDIT_COSTS = {
 export type InterviewDuration = '10min' | '25min'
 
 export async function getUserCredits(userId: string): Promise<number> {
-  const supabase = await createClient()
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('credits')
-    .eq('id', userId)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching credits:', error)
+  try {
+    const supabase = await createClient()
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('credits')
+      .eq('id', userId)
+      .single()
+    
+    if (error) {
+      console.error('Error fetching credits:', error)
+      // If profile doesn't exist, return 0 (default)
+      if (error.code === 'PGRST116') {
+        return 0
+      }
+      throw error
+    }
+    
+    return data?.credits ?? 0
+  } catch (error) {
+    console.error('Failed to get user credits:', error)
     return 0
   }
-  
-  return data?.credits ?? 0
 }
 
 export async function getCreditInfo(userId: string): Promise<CreditInfo> {
-  const credits = await getUserCredits(userId)
-  
-  return {
-    credits,
-    canStart10Min: credits >= CREDIT_COSTS['10min'],
-    canStart25Min: credits >= CREDIT_COSTS['25min'],
+  try {
+    if (!userId) {
+      throw new Error('User ID is required')
+    }
+    
+    const credits = await getUserCredits(userId)
+    
+    return {
+      credits,
+      canStart10Min: credits >= CREDIT_COSTS['10min'],
+      canStart25Min: credits >= CREDIT_COSTS['25min'],
+    }
+  } catch (error) {
+    console.error('Failed to get credit info:', error)
+    // Return default values on error
+    return {
+      credits: 0,
+      canStart10Min: false,
+      canStart25Min: false,
+    }
   }
 }
 
