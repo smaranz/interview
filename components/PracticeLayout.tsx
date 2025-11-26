@@ -320,16 +320,24 @@ Speak naturally as if in a real video call interview.`
       
       // Try API route first (better error messages)
       try {
-        const response = await fetch('/api/credits')
+        const response = await fetch('/api/credits', {
+          cache: 'no-store', // Prevent caching
+        })
         if (response.ok) {
           const data = await response.json()
-          console.log('Credits from API:', data.credits)
-          setCredits(data.credits)
-          setIsLoadingCredits(false)
-          return
+          console.log('Credits from API:', data.credits, 'Full response:', data)
+          if (typeof data.credits === 'number') {
+            console.log('Setting credits state to:', data.credits)
+            setCredits(data.credits)
+            console.log('Credits state should now be:', data.credits)
+            setIsLoadingCredits(false)
+            return
+          } else {
+            console.error('Invalid credits value from API:', data.credits, typeof data.credits)
+          }
         } else {
-          const errorData = await response.json()
-          console.error('API error:', errorData)
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('API error:', response.status, errorData)
         }
       } catch (apiError) {
         console.warn('API route failed, trying server action:', apiError)
@@ -412,12 +420,12 @@ Speak naturally as if in a real video call interview.`
               Paste the job application link to tailor the AI interview.
             </p>
             <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2">
-              <Star className="h-5 w-5 text-yellow-400 fill-current" />
-              <span className="text-white font-medium">
+              <Star className="h-5 w-5 text-yellow-400 fill-current flex-shrink-0" />
+              <span className="text-white font-medium flex-shrink-0">
                 {isLoadingCredits ? 'Loading...' : credits !== null ? `${credits.toLocaleString()} Credits` : 'Loading...'}
               </span>
               {credits !== null && !isLoadingCredits && (
-                <span className="text-neutral-400 text-sm">
+                <span className="text-neutral-400 text-sm flex-shrink-0">
                   ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
                 </span>
               )}
@@ -427,11 +435,11 @@ Speak naturally as if in a real video call interview.`
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('Refresh button clicked')
+                  console.log('Refresh button clicked, current credits:', credits)
                   fetchCredits()
                 }}
                 disabled={isLoadingCredits}
-                className="ml-auto text-xs h-6 px-2 disabled:opacity-50"
+                className="ml-auto text-xs h-6 px-2 disabled:opacity-50 flex-shrink-0"
                 title="Refresh credits"
               >
                 {isLoadingCredits ? <Loader2 className="h-3 w-3 animate-spin" /> : '↻'}
