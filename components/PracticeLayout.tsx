@@ -159,7 +159,8 @@ Speak naturally as if in a real video call.`
 
     try {
       // Pass the existing stream to reuse the audio track (avoids requesting permission twice)
-      await liveClientRef.current.connect(systemInstruction, stream)
+      // stream might be null if startMedia() failed, which is fine - connect() will request it
+      await liveClientRef.current.connect(systemInstruction, stream || undefined)
     } catch (err) {
       console.error('Failed to start realtime session:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
