@@ -337,9 +337,19 @@ Speak naturally as if in a real video call interview.`
             // Auto-select duration if user has enough credits and nothing is selected
             // Use functional update to avoid dependency issues
             setSelectedDuration((current) => {
-              if (current) return current // Don't change if already selected
-              if (data.credits >= 30) return '25min'
-              if (data.credits >= 15) return '10min'
+              if (current) {
+                console.log('Duration already selected:', current)
+                return current // Don't change if already selected
+              }
+              if (data.credits >= 30) {
+                console.log('Auto-selecting 25min duration')
+                return '25min'
+              }
+              if (data.credits >= 15) {
+                console.log('Auto-selecting 10min duration')
+                return '10min'
+              }
+              console.log('Not enough credits to auto-select duration')
               return null
             })
             return
@@ -362,9 +372,19 @@ Speak naturally as if in a real video call interview.`
       // Auto-select duration if user has enough credits and nothing is selected
       // Use functional update to avoid dependency issues
       setSelectedDuration((current) => {
-        if (current) return current // Don't change if already selected
-        if (creditInfo.canStart25Min) return '25min'
-        if (creditInfo.canStart10Min) return '10min'
+        if (current) {
+          console.log('Duration already selected:', current)
+          return current // Don't change if already selected
+        }
+        if (creditInfo.canStart25Min) {
+          console.log('Auto-selecting 25min duration')
+          return '25min'
+        }
+        if (creditInfo.canStart10Min) {
+          console.log('Auto-selecting 10min duration')
+          return '10min'
+        }
+        console.log('Not enough credits to auto-select duration')
         return null
       })
     } catch (error) {
@@ -562,12 +582,21 @@ Speak naturally as if in a real video call interview.`
 
             <Button 
               size="lg" 
-              onClick={startSession}
+              onClick={() => {
+                console.log('Start button clicked:', { jobUrl, selectedDuration })
+                startSession()
+              }}
               disabled={!jobUrl.trim() || !selectedDuration}
               className="w-full bg-white text-black hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Start Live Session
             </Button>
+            {(!jobUrl.trim() || !selectedDuration) && (
+              <p className="text-xs text-neutral-500 mt-2">
+                {!jobUrl.trim() && 'Please enter a job application link. '}
+                {!selectedDuration && 'Please select an interview duration.'}
+              </p>
+            )}
           </div>
         </div>
       </div>
