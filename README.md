@@ -77,14 +77,14 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback/google
 
-# Gemini API (for AI interview features)
-GOOGLE_GEMINI_API_KEY=AIzaSyBFgpZQI3B-ZyWLdgWMGUCO9Z3WVD3AzzA
+# OpenAI API (for all AI interview features)
+OPENAI_API_KEY=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
 ```
 
 **Note**: 
 - All Supabase keys (URL, anon key, and service role key) are already configured from your project
 - Google OAuth is configured directly in Supabase. The `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables are optional and reserved for future Google Calendar/Meet API integration.
-- Gemini API key is configured for future AI interview integration. Currently using mock data in practice mode.
+- All AI features use OpenAI: Practice mode uses GPT Realtime API (`gpt-realtime-mini`) for voice interviews, and text-based interviews use GPT-4o-mini. Set `OPENAI_API_KEY` with your OpenAI API key.
 
 ### Installation
 
@@ -140,7 +140,9 @@ lib/
   auth/
     google.ts             # Google SSO helper functions
   google.ts               # Google Calendar/Meet stubs
-  realtime.ts             # Gemini Realtime stubs
+  realtime.ts             # OpenAI Realtime stubs
+  openai.ts              # OpenAI text-based interview functions
+  openai-realtime.ts     # OpenAI Realtime WebRTC client
   utils.ts                # Utility functions
 ```
 
@@ -188,7 +190,6 @@ This project is optimized for Vercel deployment:
 
 ## Future Integrations
 
-- **Gemini Realtime**: Replace mock AI with actual Gemini API
 - **Google Calendar API**: Real calendar event creation
 - **Google Meet API**: Actual Meet link generation
 

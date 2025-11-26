@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   return NextResponse.json({
     id,
     status: 'active',
-    message: 'Stub response - implement Gemini Realtime integration',
+    message: 'Stub response - OpenAI Realtime integration available via /api/realtime/session',
   })
 }
 

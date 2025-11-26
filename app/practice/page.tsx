@@ -10,8 +10,6 @@ export default async function PracticePage() {
     redirect('/auth/signin')
   }
 
-  const geminiKey = process.env.GOOGLE_GEMINI_API_KEY || ''
-
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -22,7 +20,7 @@ export default async function PracticePage() {
           </p>
         </div>
 
-        <PracticeLayout geminiApiKey={geminiKey} />
+        <PracticeLayout />
       </div>
     </div>
   )

@@ -15,7 +15,7 @@ export async function POST() {
   return NextResponse.json({
     id: `session-${Date.now()}`,
     status: 'created',
-    message: 'Stub response - implement Gemini Realtime integration',
+    message: 'Stub response - OpenAI Realtime integration available via /api/realtime/session',
   })
 }
 

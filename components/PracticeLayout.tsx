@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Send, Loader2, Volume2, VolumeX, Briefcase } from 'lucide-react'
+import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Loader2, Volume2, VolumeX, Briefcase } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { cheatDetectionService, type CheatEvent, type CheatMetrics } from '@/lib/cheat-detection'
-import { GeminiLiveClient } from '@/lib/gemini-live'
+import { OpenAIRealtimeClient } from '@/lib/openai-realtime'
 
 interface AIMessage {
   id: string
@@ -16,11 +16,7 @@ interface AIMessage {
   timestamp: Date
 }
 
-interface PracticeLayoutProps {
-  geminiApiKey: string
-}
-
-export function PracticeLayout({ geminiApiKey }: PracticeLayoutProps) {
+export function PracticeLayout() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
@@ -35,7 +31,7 @@ export function PracticeLayout({ geminiApiKey }: PracticeLayoutProps) {
   const [jobDescription, setJobDescription] = useState('')
   const [jobUrl, setJobUrl] = useState('')
   
-  const liveClientRef = useRef<GeminiLiveClient | null>(null)
+  const liveClientRef = useRef<OpenAIRealtimeClient | null>(null)
   
   // Cheat detection state
   const [, setCheatMetrics] = useState<CheatMetrics | null>(null)
@@ -112,9 +108,33 @@ export function PracticeLayout({ geminiApiKey }: PracticeLayoutProps) {
       }
     )
 
-    // Start Gemini Live Client
+    // Start OpenAI Realtime client
     if (!liveClientRef.current) {
-      const systemInstruction = `You are a professional AI interviewer conducting a practice job interview. 
+      liveClientRef.current = new OpenAIRealtimeClient({
+        model: 'gpt-realtime-mini',
+        voice: 'marin'
+      })
+
+      liveClientRef.current.onStatusChange = (status) => setConnectionStatus(status)
+      liveClientRef.current.onTextData = (text) => {
+        if (!text) return
+        setMessages(prev => [
+          ...prev,
+          {
+            id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`,
+            role: 'assistant',
+            content: text,
+            timestamp: new Date()
+          }
+        ])
+      }
+      liveClientRef.current.onError = (error) => {
+        console.error('OpenAI Realtime error:', error)
+        setConnectionStatus('disconnected')
+      }
+    }
+
+    const systemInstruction = `You are a professional AI interviewer conducting a practice job interview. 
 The candidate is applying for the following role:
 ${jobDescription.trim()}
 ${jobUrl ? `Job Link: ${jobUrl}` : ''}
@@ -129,23 +149,18 @@ Your role is to:
 Start by introducing yourself briefly and asking the first question related to the job description. Focus on behavioral and situational questions relevant to this specific role.
 Speak naturally as if in a real video call.`
 
-      liveClientRef.current = new GeminiLiveClient(geminiApiKey, {
-        systemInstruction
-      })
-
-      // Set handlers as properties
-      liveClientRef.current.onStatusChange = (status) => setConnectionStatus(status)
-      liveClientRef.current.onTextData = (text) => {
-        // Add AI transcript to chat (optional, if API sends text)
-        // Note: The Bidi API usually sends audio, text might be null or separate
-      }
-      liveClientRef.current.onError = (error) => {
-        console.error('Gemini Live error:', error)
-        setConnectionStatus('disconnected')
-      }
+    try {
+      await liveClientRef.current.connect(systemInstruction)
+    } catch (err) {
+      console.error('Failed to start realtime session:', err)
+      alert('Failed to start the AI interview. Please ensure your microphone is accessible and try again.')
+      cheatDetectionService.stop()
+      stopMedia()
+      liveClientRef.current?.disconnect()
+      liveClientRef.current = null
+      setIsSessionActive(false)
+      return
     }
-
-    await liveClientRef.current.connect()
   }
 
   const endSession = () => {
@@ -154,6 +169,7 @@ Speak naturally as if in a real video call.`
     
     if (liveClientRef.current) {
       liveClientRef.current.disconnect()
+      liveClientRef.current = null
     }
     
     const finalScore = cheatDetectionService.getIntegrityScore()

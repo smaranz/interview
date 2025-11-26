@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || '')
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
 
 const INTERVIEW_SYSTEM_PROMPT = `You are a professional AI interviewer conducting a practice job interview. Your role is to:
 
@@ -17,33 +16,84 @@ export async function POST(request: NextRequest) {
   try {
     const { messages, userMessage, isStart } = await request.json()
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-
-    if (isStart) {
-      const chat = model.startChat({
-        systemInstruction: INTERVIEW_SYSTEM_PROMPT,
-      })
-
-      const result = await chat.sendMessage(
-        'Start the interview. Introduce yourself briefly and ask the first question.'
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'OPENAI_API_KEY is not configured' },
+        { status: 500 }
       )
-      const response = await result.response
-      return NextResponse.json({ response: response.text() })
     }
 
-    const chat = model.startChat({
-      history: messages.map((msg: { role: string; content: string }) => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }],
+    if (isStart) {
+      const openaiMessages = [
+        { role: 'system', content: INTERVIEW_SYSTEM_PROMPT },
+        {
+          role: 'user',
+          content: 'Start the interview. Introduce yourself briefly and ask the first question.',
+        },
+      ]
+
+      const response = await fetch(OPENAI_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: openaiMessages,
+          temperature: 0.7,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.text()
+        console.error('OpenAI API error:', response.status, error)
+        return NextResponse.json(
+          { error: 'Failed to get AI response' },
+          { status: 500 }
+        )
+      }
+
+      const data = await response.json()
+      return NextResponse.json({ response: data.choices[0]?.message?.content || '' })
+    }
+
+    const openaiMessages = [
+      { role: 'system', content: INTERVIEW_SYSTEM_PROMPT },
+      ...messages.map((msg: { role: string; content: string }) => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content,
       })),
-      systemInstruction: INTERVIEW_SYSTEM_PROMPT,
+      { role: 'user', content: userMessage },
+    ]
+
+    const response = await fetch(OPENAI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: openaiMessages,
+        temperature: 0.7,
+      }),
     })
 
-    const result = await chat.sendMessage(userMessage)
-    const response = await result.response
-    return NextResponse.json({ response: response.text() })
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('OpenAI API error:', response.status, error)
+      return NextResponse.json(
+        { error: 'Failed to get AI response' },
+        { status: 500 }
+      )
+    }
+
+    const data = await response.json()
+    return NextResponse.json({ response: data.choices[0]?.message?.content || '' })
   } catch (error) {
-    console.error('Gemini API error:', error)
+    console.error('OpenAI API error:', error)
     return NextResponse.json(
       { error: 'Failed to get AI response' },
       { status: 500 }

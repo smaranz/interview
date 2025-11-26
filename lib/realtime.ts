@@ -1,11 +1,11 @@
 /**
- * Gemini Realtime Integration
+ * OpenAI Realtime Integration
  * 
- * This module provides stub functions for Gemini Realtime AI integration.
- * Replace these implementations when integrating with the actual Gemini API.
+ * This module provides stub functions for OpenAI Realtime AI integration.
+ * The actual realtime functionality is implemented in lib/openai-realtime.ts
  * 
- * Gemini API Key: Available via process.env.GOOGLE_GEMINI_API_KEY
- * API Documentation: https://ai.google.dev/docs
+ * OpenAI API Key: Available via process.env.OPENAI_API_KEY
+ * API Documentation: https://platform.openai.com/docs/guides/realtime
  */
 
 export interface AIMessage {
