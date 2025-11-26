@@ -328,9 +328,17 @@ Speak naturally as if in a real video call interview.`
           console.log('Credits from API:', data.credits, 'Full response:', data)
           if (typeof data.credits === 'number') {
             console.log('Setting credits state to:', data.credits)
-            setCredits(data.credits)
-            console.log('Credits state should now be:', data.credits)
+            // Force state update
+            setCredits(() => {
+              console.log('State setter called with:', data.credits)
+              return data.credits
+            })
+            // Also set loading to false
             setIsLoadingCredits(false)
+            // Force a small delay to ensure state updates
+            setTimeout(() => {
+              console.log('State after timeout - credits should be:', data.credits)
+            }, 100)
             return
           } else {
             console.error('Invalid credits value from API:', data.credits, typeof data.credits)
@@ -361,6 +369,11 @@ Speak naturally as if in a real video call interview.`
   useEffect(() => {
     fetchCredits()
   }, [fetchCredits])
+
+  // Debug: Log when credits state changes
+  useEffect(() => {
+    console.log('Credits state changed to:', credits, 'isLoadingCredits:', isLoadingCredits)
+  }, [credits, isLoadingCredits])
 
   // Timer for interview duration
   useEffect(() => {
@@ -419,13 +432,13 @@ Speak naturally as if in a real video call interview.`
             <p className="text-neutral-400">
               Paste the job application link to tailor the AI interview.
             </p>
-            <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2">
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 min-w-0">
               <Star className="h-5 w-5 text-yellow-400 fill-current flex-shrink-0" />
-              <span className="text-white font-medium flex-shrink-0">
+              <span className="text-white font-medium whitespace-nowrap">
                 {isLoadingCredits ? 'Loading...' : credits !== null ? `${credits.toLocaleString()} Credits` : 'Loading...'}
               </span>
               {credits !== null && !isLoadingCredits && (
-                <span className="text-neutral-400 text-sm flex-shrink-0">
+                <span className="text-neutral-400 text-sm whitespace-nowrap">
                   ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
                 </span>
               )}
@@ -435,7 +448,7 @@ Speak naturally as if in a real video call interview.`
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('Refresh button clicked, current credits:', credits)
+                  console.log('Refresh button clicked, current credits state:', credits)
                   fetchCredits()
                 }}
                 disabled={isLoadingCredits}
