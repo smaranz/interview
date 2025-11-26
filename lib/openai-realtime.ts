@@ -197,7 +197,15 @@ export class OpenAIRealtimeClient {
       this.audioElement = document.createElement('audio')
       this.audioElement.autoplay = true
       this.audioElement.style.display = 'none'
+      this.audioElement.setAttribute('playsinline', 'true')
       document.body.appendChild(this.audioElement)
+      
+      // Ensure audio plays
+      this.audioElement.addEventListener('loadedmetadata', () => {
+        this.audioElement?.play().catch(err => {
+          console.error('Failed to play audio:', err)
+        })
+      })
     }
   }
 
@@ -206,8 +214,13 @@ export class OpenAIRealtimeClient {
 
     // Handle remote audio tracks from OpenAI
     this.pc.ontrack = (event) => {
+      console.log('Received remote audio track:', event)
       if (this.audioElement && event.streams[0]) {
         this.audioElement.srcObject = event.streams[0]
+        // Force play
+        this.audioElement.play().catch(err => {
+          console.error('Failed to play remote audio:', err)
+        })
       }
     }
 
@@ -242,22 +255,21 @@ export class OpenAIRealtimeClient {
     this.dataChannel = this.pc.createDataChannel('oai-events')
 
     this.dataChannel.onopen = () => {
+      console.log('Data channel opened, sending session update')
+      
+      // Update session with instructions
       this.sendEvent({
         type: 'session.update',
         session: {
           type: 'realtime',
-          model: this.config.model,
           instructions: this.currentInstructions,
-          audio: {
-            output: {
-              voice: this.config.voice,
-            },
-          },
         },
       })
 
-      // Prompt the model to begin the interview immediately
-      this.startConversation()
+      // Wait a bit for session to be ready, then start conversation
+      setTimeout(() => {
+        this.startConversation()
+      }, 500)
     }
 
     this.dataChannel.onmessage = (event) => {
@@ -275,6 +287,7 @@ export class OpenAIRealtimeClient {
   }
 
   private startConversation() {
+    console.log('Starting conversation, sending response.create')
     this.sendEvent({
       type: 'response.create',
       response: {
@@ -285,6 +298,7 @@ export class OpenAIRealtimeClient {
   }
 
   private handleServerEvent(event: any) {
+    console.log('Received server event:', event.type, event)
     this.onEvent?.(event)
 
     if (event.type === 'response.output_text.delta') {
@@ -301,8 +315,21 @@ export class OpenAIRealtimeClient {
       this.activeResponse = ''
     }
 
+    if (event.type === 'session.updated') {
+      console.log('Session updated successfully')
+    }
+
+    if (event.type === 'response.created') {
+      console.log('Response created, waiting for audio...')
+    }
+
+    if (event.type === 'response.audio_transcript.delta' || event.type === 'response.audio_transcript.done') {
+      console.log('Audio transcript event:', event)
+    }
+
     if (typeof event.type === 'string' && event.type.endsWith('.error')) {
       const message = event.error?.message || 'Realtime session error'
+      console.error('Server error event:', event)
       this.onError?.(new Error(message))
     }
   }

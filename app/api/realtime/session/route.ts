@@ -22,18 +22,20 @@ export async function POST(request: NextRequest) {
   try {
     const formData = new FormData()
     formData.set('sdp', sdpOffer)
-    formData.set(
-      'session',
-      JSON.stringify({
-        type: 'realtime',
-        model: 'gpt-realtime-mini',
-        audio: {
-          output: {
-            voice: 'marin',
-          },
+    
+    // Note: Instructions will be sent via data channel after connection
+    // Initial session config just sets up the model and voice
+    const sessionConfig = {
+      type: 'realtime',
+      model: 'gpt-realtime-mini',
+      audio: {
+        output: {
+          voice: 'marin',
         },
-      })
-    )
+      },
+    }
+    
+    formData.set('session', JSON.stringify(sessionConfig))
 
     const response = await fetch(OPENAI_REALTIME_URL, {
       method: 'POST',
