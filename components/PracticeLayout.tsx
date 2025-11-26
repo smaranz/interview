@@ -130,30 +130,65 @@ export function PracticeLayout({ userId }: PracticeLayoutProps) {
       return
     }
 
-    // Check credits
-    const creditInfo = await getCreditInfo(userId)
-    setCredits(creditInfo.credits)
-    
-    // Verify user has enough credits for selected duration
-    const requiredCredits = CREDIT_COSTS[selectedDuration]
-    if (creditInfo.credits < requiredCredits) {
-      alert(`Insufficient credits. You need at least ${requiredCredits} credits for a ${selectedDuration} interview. You currently have ${creditInfo.credits} credits.`)
+    try {
+      // Try API route first (more reliable than server actions)
+      const deductResponse = await fetch('/api/credits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ duration: selectedDuration }),
+      })
+
+      if (deductResponse.ok) {
+        const deductData = await deductResponse.json()
+        if (deductData.success) {
+          setCredits(deductData.remainingCredits)
+          setInterviewDuration(selectedDuration)
+          interviewStartTimeRef.current = Date.now()
+        } else {
+          alert(deductData.error || 'Failed to deduct credits. Please try again.')
+          return
+        }
+      } else {
+        // API route failed, try server action as fallback
+        const errorData = await deductResponse.json().catch(() => ({}))
+        console.warn('API route failed, trying server action:', errorData)
+        
+        if (errorData.error) {
+          alert(errorData.error + (errorData.details ? `: ${errorData.details}` : ''))
+        }
+        
+        // Fallback to server action
+        const creditInfo = await getCreditInfo(userId)
+        setCredits(creditInfo.credits)
+        
+        const requiredCredits = CREDIT_COSTS[selectedDuration]
+        if (creditInfo.credits < requiredCredits) {
+          alert(`Insufficient credits. You need at least ${requiredCredits} credits for a ${selectedDuration} interview. You currently have ${creditInfo.credits} credits.`)
+          return
+        }
+
+        const deductResult = await deductCredits(userId, selectedDuration)
+        if (!deductResult.success) {
+          alert(deductResult.error || 'Failed to start interview. Please try again.')
+          return
+        }
+        
+        setCredits(deductResult.remainingCredits)
+        setInterviewDuration(selectedDuration)
+        interviewStartTimeRef.current = Date.now()
+      }
+
+      // Continue with media and session setup only if credit deduction succeeded
+      await startMedia()
+      setIsSessionActive(true)
+    } catch (error) {
+      console.error('Error starting session:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to start interview: ${errorMessage}. Please try again.`)
       return
     }
-
-    // Deduct credits
-    const deductResult = await deductCredits(userId, selectedDuration)
-    if (!deductResult.success) {
-      alert(deductResult.error || 'Failed to start interview. Please try again.')
-      return
-    }
-    
-    setCredits(deductResult.remainingCredits)
-    setInterviewDuration(selectedDuration)
-    interviewStartTimeRef.current = Date.now()
-
-    await startMedia()
-    setIsSessionActive(true)
     
     // Start cheat detection
     cheatDetectionService.start(
