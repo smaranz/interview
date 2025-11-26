@@ -51,6 +51,7 @@ export function PracticeLayout({ userId }: PracticeLayoutProps) {
   
   // Credits state
   const [credits, setCredits] = useState<number | null>(null)
+  const [isLoadingCredits, setIsLoadingCredits] = useState(false)
   const [interviewDuration, setInterviewDuration] = useState<InterviewDuration | null>(null)
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const interviewStartTimeRef = useRef<number | null>(null)
@@ -305,7 +306,7 @@ Speak naturally as if in a real video call interview.`
     setMessages([])
   }
 
-  // Fetch credits function
+  // Fetch credits function - try API route first, fallback to server action
   const fetchCredits = useCallback(async () => {
     if (!userId) {
       console.warn('No userId provided, cannot fetch credits')
@@ -313,15 +314,38 @@ Speak naturally as if in a real video call interview.`
       return
     }
     
+    setIsLoadingCredits(true)
     try {
       console.log('Fetching credits for userId:', userId)
+      
+      // Try API route first (better error messages)
+      try {
+        const response = await fetch('/api/credits')
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Credits from API:', data.credits)
+          setCredits(data.credits)
+          setIsLoadingCredits(false)
+          return
+        } else {
+          const errorData = await response.json()
+          console.error('API error:', errorData)
+        }
+      } catch (apiError) {
+        console.warn('API route failed, trying server action:', apiError)
+      }
+      
+      // Fallback to server action
       const creditInfo = await getCreditInfo(userId)
-      console.log('Credits fetched:', creditInfo.credits)
+      console.log('Credits fetched from server action:', creditInfo.credits)
       setCredits(creditInfo.credits)
     } catch (error) {
       console.error('Failed to fetch credits:', error)
       // Set to 0 on error so UI still shows something
       setCredits(0)
+      alert('Failed to fetch credits. Please check the console for details.')
+    } finally {
+      setIsLoadingCredits(false)
     }
   }, [userId])
 
@@ -390,9 +414,9 @@ Speak naturally as if in a real video call interview.`
             <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2">
               <Star className="h-5 w-5 text-yellow-400 fill-current" />
               <span className="text-white font-medium">
-                {credits !== null ? `${credits.toLocaleString()} Credits` : 'Loading...'}
+                {isLoadingCredits ? 'Loading...' : credits !== null ? `${credits.toLocaleString()} Credits` : 'Loading...'}
               </span>
-              {credits !== null && (
+              {credits !== null && !isLoadingCredits && (
                 <span className="text-neutral-400 text-sm">
                   ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
                 </span>
@@ -400,11 +424,17 @@ Speak naturally as if in a real video call interview.`
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={fetchCredits}
-                className="ml-auto text-xs h-6 px-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  console.log('Refresh button clicked')
+                  fetchCredits()
+                }}
+                disabled={isLoadingCredits}
+                className="ml-auto text-xs h-6 px-2 disabled:opacity-50"
                 title="Refresh credits"
               >
-                ↻
+                {isLoadingCredits ? <Loader2 className="h-3 w-3 animate-spin" /> : '↻'}
               </Button>
             </div>
           </div>
