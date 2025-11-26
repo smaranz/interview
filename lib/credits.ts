@@ -92,40 +92,65 @@ export async function deductCredits(
   userId: string,
   duration: InterviewDuration
 ): Promise<{ success: boolean; remainingCredits: number; error?: string }> {
-  const supabase = await createClient()
-  const cost = CREDIT_COSTS[duration]
-  
-  // Get current credits
-  const currentCredits = await getUserCredits(userId)
-  
-  if (currentCredits < cost) {
+  try {
+    const supabase = await createClient()
+    const cost = CREDIT_COSTS[duration]
+    
+    // Verify authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user || user.id !== userId) {
+      console.error('Authentication error in deductCredits:', authError, 'User ID:', user?.id, 'Expected:', userId)
+      return {
+        success: false,
+        remainingCredits: 0,
+        error: 'Authentication failed',
+      }
+    }
+    
+    // Get current credits
+    const currentCredits = await getUserCredits(userId)
+    console.log(`Deducting ${cost} credits for ${duration} interview. Current: ${currentCredits}`)
+    
+    if (currentCredits < cost) {
+      return {
+        success: false,
+        remainingCredits: currentCredits,
+        error: `Insufficient credits. You need ${cost} credits for a ${duration} interview, but you only have ${currentCredits} credits.`,
+      }
+    }
+    
+    // Deduct credits atomically using SQL to ensure consistency
+    const newCredits = currentCredits - cost
+    console.log(`Updating credits from ${currentCredits} to ${newCredits}`)
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ credits: newCredits })
+      .eq('id', userId)
+      .select('credits, email')
+      .single()
+    
+    if (error) {
+      console.error('Error deducting credits:', error)
+      return {
+        success: false,
+        remainingCredits: currentCredits,
+        error: `Failed to deduct credits: ${error.message}`,
+      }
+    }
+    
+    console.log('Credits deducted successfully. Remaining:', data.credits, 'Email:', data.email)
+    return {
+      success: true,
+      remainingCredits: data.credits,
+    }
+  } catch (error) {
+    console.error('Exception in deductCredits:', error)
     return {
       success: false,
-      remainingCredits: currentCredits,
-      error: `Insufficient credits. You need ${cost} credits for a ${duration} interview, but you only have ${currentCredits} credits.`,
+      remainingCredits: 0,
+      error: 'Failed to deduct credits',
     }
-  }
-  
-  // Deduct credits atomically
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({ credits: currentCredits - cost })
-    .eq('id', userId)
-    .select('credits')
-    .single()
-  
-  if (error) {
-    console.error('Error deducting credits:', error)
-    return {
-      success: false,
-      remainingCredits: currentCredits,
-      error: 'Failed to deduct credits. Please try again.',
-    }
-  }
-  
-  return {
-    success: true,
-    remainingCredits: data.credits,
   }
 }
 
@@ -133,29 +158,52 @@ export async function addCredits(
   userId: string,
   amount: number
 ): Promise<{ success: boolean; newBalance: number; error?: string }> {
-  const supabase = await createClient()
-  
-  const currentCredits = await getUserCredits(userId)
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({ credits: currentCredits + amount })
-    .eq('id', userId)
-    .select('credits')
-    .single()
-  
-  if (error) {
-    console.error('Error adding credits:', error)
+  try {
+    const supabase = await createClient()
+    
+    // Verify authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user || user.id !== userId) {
+      console.error('Authentication error in addCredits:', authError)
+      return {
+        success: false,
+        newBalance: 0,
+        error: 'Authentication failed',
+      }
+    }
+    
+    const currentCredits = await getUserCredits(userId)
+    
+    console.log(`Adding ${amount} credits to user ${userId}. Current: ${currentCredits}, New: ${currentCredits + amount}`)
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ credits: currentCredits + amount })
+      .eq('id', userId)
+      .select('credits')
+      .single()
+    
+    if (error) {
+      console.error('Error adding credits:', error)
+      return {
+        success: false,
+        newBalance: currentCredits,
+        error: 'Failed to add credits. Please try again.',
+      }
+    }
+    
+    console.log('Credits added successfully. New balance:', data.credits)
+    return {
+      success: true,
+      newBalance: data.credits,
+    }
+  } catch (error) {
+    console.error('Exception in addCredits:', error)
     return {
       success: false,
-      newBalance: currentCredits,
-      error: 'Failed to add credits. Please try again.',
+      newBalance: 0,
+      error: 'Failed to add credits',
     }
-  }
-  
-  return {
-    success: true,
-    newBalance: data.credits,
   }
 }
 
