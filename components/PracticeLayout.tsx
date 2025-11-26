@@ -432,13 +432,17 @@ Speak naturally as if in a real video call interview.`
             <p className="text-neutral-400">
               Paste the job application link to tailor the AI interview.
             </p>
-            <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 min-w-0">
-              <Star className="h-5 w-5 text-yellow-400 fill-current flex-shrink-0" />
-              <span className="text-white font-medium whitespace-nowrap">
-                {isLoadingCredits ? 'Loading...' : credits !== null ? `${credits.toLocaleString()} Credits` : 'Loading...'}
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2" data-testid="credits-badge">
+              <Star className="h-5 w-5 text-yellow-400 fill-current" />
+              <span className="text-white font-medium" data-testid="credits-text">
+                {isLoadingCredits 
+                  ? 'Loading...' 
+                  : credits !== null 
+                    ? `${credits.toLocaleString()} Credits` 
+                    : 'Loading...'}
               </span>
               {credits !== null && !isLoadingCredits && (
-                <span className="text-neutral-400 text-sm whitespace-nowrap">
+                <span className="text-neutral-400 text-sm" data-testid="credits-info">
                   ({credits >= CREDIT_COSTS['25min'] ? '25 min' : credits >= CREDIT_COSTS['10min'] ? '10 min' : 'Insufficient'} interview available)
                 </span>
               )}
@@ -448,11 +452,11 @@ Speak naturally as if in a real video call interview.`
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('Refresh button clicked, current credits state:', credits)
+                  console.log('Refresh button clicked, current credits state:', credits, 'isLoading:', isLoadingCredits)
                   fetchCredits()
                 }}
                 disabled={isLoadingCredits}
-                className="ml-auto text-xs h-6 px-2 disabled:opacity-50 flex-shrink-0"
+                className="ml-auto text-xs h-6 px-2 disabled:opacity-50"
                 title="Refresh credits"
               >
                 {isLoadingCredits ? <Loader2 className="h-3 w-3 animate-spin" /> : '↻'}
