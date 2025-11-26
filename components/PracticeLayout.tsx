@@ -1,13 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Loader2, Volume2, VolumeX, Briefcase } from 'lucide-react'
+import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Loader2, Volume2, VolumeX, Briefcase, X, Star, TrendingUp, BookOpen, Lightbulb, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { cheatDetectionService, type CheatEvent, type CheatMetrics } from '@/lib/cheat-detection'
 import { OpenAIRealtimeClient } from '@/lib/openai-realtime'
+import { generateInterviewFeedback, type InterviewFeedback } from '@/lib/interview-feedback'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface AIMessage {
   id: string
@@ -36,6 +38,11 @@ export function PracticeLayout() {
   // Cheat detection state
   const [, setCheatMetrics] = useState<CheatMetrics | null>(null)
   const [cheatEvents, setCheatEvents] = useState<CheatEvent[]>([])
+  
+  // Feedback state
+  const [feedback, setFeedback] = useState<InterviewFeedback | null>(null)
+  const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
 
   const startMedia = useCallback(async () => {
     try {
@@ -194,7 +201,7 @@ Speak naturally as if in a real video call interview.`
     }
   }
 
-  const endSession = () => {
+  const endSession = async () => {
     stopMedia()
     cheatDetectionService.stop()
     
@@ -208,10 +215,45 @@ Speak naturally as if in a real video call interview.`
     console.log('Cheat events:', cheatEvents)
     
     setIsSessionActive(false)
-    setMessages([])
+    
+    // Generate feedback if we have messages
+    if (messages.length > 0 && jobDescription.trim()) {
+      setIsGeneratingFeedback(true)
+      try {
+        const conversationHistory = messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        }))
+        const feedbackData = await generateInterviewFeedback(conversationHistory, jobDescription)
+        setFeedback(feedbackData)
+        setShowFeedback(true)
+      } catch (error) {
+        console.error('Failed to generate feedback:', error)
+        // Still show feedback modal with error message
+        setFeedback({
+          score: 0,
+          overallFeedback: 'Unable to generate feedback. Please try again.',
+          strengths: [],
+          improvements: [],
+          studyRecommendations: [],
+          specificExamples: [],
+        })
+        setShowFeedback(true)
+      } finally {
+        setIsGeneratingFeedback(false)
+      }
+    }
+    
+    // Don't clear messages yet - keep them for feedback display
     setCheatEvents([])
     // Reset client to allow re-init with new job desc if needed
     liveClientRef.current = null 
+  }
+  
+  const closeFeedback = () => {
+    setShowFeedback(false)
+    setFeedback(null)
+    setMessages([])
   }
 
   useEffect(() => {
@@ -375,6 +417,131 @@ Speak naturally as if in a real video call interview.`
           )}
         </div>
       </div>
+      
+      {/* Feedback Modal */}
+      {showFeedback && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-neutral-900 border-neutral-800">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-neutral-800">
+              <CardTitle className="text-2xl text-white">Interview Feedback</CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeFeedback}
+                className="text-neutral-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              {isGeneratingFeedback ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-white mb-4" />
+                  <p className="text-neutral-400">Generating your feedback...</p>
+                </div>
+              ) : feedback ? (
+                <>
+                  {/* Score Section */}
+                  <div className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-800/50 p-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-2">Overall Score</h3>
+                      <p className="text-sm text-neutral-400">{feedback.overallFeedback}</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="text-5xl font-bold text-white mb-1">{feedback.score}</div>
+                      <div className="flex items-center gap-1 text-yellow-400">
+                        <Star className="h-5 w-5 fill-current" />
+                        <span className="text-sm">/ 100</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Strengths */}
+                  {feedback.strengths.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-green-400" />
+                        <h3 className="text-lg font-semibold text-white">Strengths</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {feedback.strengths.map((strength, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-neutral-300">
+                            <span className="text-green-400 mt-1">•</span>
+                            <span>{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Areas for Improvement */}
+                  {feedback.improvements.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-amber-400" />
+                        <h3 className="text-lg font-semibold text-white">Areas for Improvement</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {feedback.improvements.map((improvement, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-neutral-300">
+                            <span className="text-amber-400 mt-1">•</span>
+                            <span>{improvement}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Study Recommendations */}
+                  {feedback.studyRecommendations.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-5 w-5 text-blue-400" />
+                        <h3 className="text-lg font-semibold text-white">Study Recommendations</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {feedback.studyRecommendations.map((rec, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-neutral-300">
+                            <span className="text-blue-400 mt-1">•</span>
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Specific Examples */}
+                  {feedback.specificExamples.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Lightbulb className="h-5 w-5 text-purple-400" />
+                        <h3 className="text-lg font-semibold text-white">Specific Examples from Interview</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {feedback.specificExamples.map((example, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-neutral-300">
+                            <span className="text-purple-400 mt-1">•</span>
+                            <span className="italic">{example}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-neutral-800">
+                    <Button
+                      onClick={closeFeedback}
+                      className="w-full bg-white text-black hover:bg-neutral-200"
+                    >
+                      Close
+                    </Button>
+                  </div>
+                </>
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
