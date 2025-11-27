@@ -17,21 +17,21 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNGMwIDIuMjA5LTEuNzkxIDQtNCA0cy00LTEuNzkxLTQtNCAxLjc5MS00IDQtNCA0IDEuNzkxIDQgNHptMCAwYzAtMi4yMDkgMS43OTEtNCA0LTRzNCAxLjc5MSA0IDQtMS43OTEgNC00IDQtNC0xLjc5MS00LTR6IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvZz48L3N2Zz4=')] opacity-20"></div>
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-24 lg:flex-row lg:items-center lg:px-8">
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16 lg:flex-row lg:items-center lg:px-8">
           <div className="flex-1">
-            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-medium text-white/80 backdrop-blur">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-medium text-white/80 backdrop-blur">
               <Sparkles className="h-4 w-4 text-white/60" />
               We just helped 10k candidates practice this week
             </div>
             <h1 className="text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-6xl">
               Meet Honest Hire — your AI interview platform.
             </h1>
-            <p className="mt-6 text-lg text-white/70 lg:text-xl">
+            <p className="mt-4 text-lg text-white/70 lg:text-xl">
               Turn any job posting into a personalized mock interview. Our AI studies the role,
               stays in character, and gives you actionable feedback so you can walk into the real
               interview confident and prepared.
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row">
               <Link href="/auth/signup">
                 <Button className="w-full bg-white text-black hover:bg-white/80 sm:w-auto" size="lg">
                   Get Started – It&apos;s Free
@@ -48,18 +48,18 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
-            <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <StatCard label="Live voice interviews" value="Realtime OpenAI" />
               <StatCard label="Detailed feedback" value="Scores • Strengths • Study plan" />
             </div>
           </div>
 
           <div className="flex-1">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-white/70">Practice Session</p>
-                  <h3 className="text-xl font-semibold text-white">Product Manager Mock Interview</h3>
+                  <h3 className="mt-1 text-xl font-semibold text-white">Product Manager Mock Interview</h3>
                 </div>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">
                   <Clock className="mr-1 inline-flex h-4 w-4" />
@@ -67,17 +67,17 @@ export default function Home() {
                 </span>
               </div>
 
-              <div className="mt-6 space-y-5 rounded-2xl bg-black/30 p-5">
+              <div className="mt-4 space-y-4 rounded-2xl bg-black/30 p-4">
                 <div>
                   <p className="text-sm text-white/60">AI Interviewer</p>
-                  <p className="text-base text-white">
+                  <p className="mt-1 text-base text-white">
                     "Hi, I&apos;ll be conducting your interview today. Let&apos;s start with a quick
                     introduction—tell me about your background and what drew you to this role."
                   </p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                   <p className="text-sm text-white/80">Key areas we&apos;ll cover</p>
-                  <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-white/70">
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-white/70">
                     <li>Leadership in ambiguous environments</li>
                     <li>Metrics mindset for product decisions</li>
                     <li>How you collaborate with engineering</li>
@@ -85,17 +85,17 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 rounded-2xl border border-white/10 bg-black/40 p-5 sm:grid-cols-2">
+              <div className="mt-4 grid gap-4 rounded-2xl border border-white/10 bg-black/40 p-4 sm:grid-cols-2">
                 <div>
                   <p className="text-sm text-white/60">Score last session</p>
-                  <p className="text-2xl font-semibold text-white">
+                  <p className="mt-1 text-2xl font-semibold text-white">
                     87
                     <span className="ml-1 text-sm font-normal text-emerald-300">Great progress</span>
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-white/60">Recommendations</p>
-                  <p className="flex items-center gap-1 text-white">
+                  <p className="mt-1 flex items-center gap-1 text-white">
                     <Star className="h-4 w-4 text-yellow-300" />
                     Deepen your STAR stories
                   </p>
@@ -106,10 +106,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-white/5 bg-black py-20">
+      <section className="border-t border-white/5 bg-black py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-bold">
               Everything You Need to Succeed
             </h2>
             <p className="text-lg text-muted-foreground">
@@ -117,7 +117,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon={Video}
               title="AI Practice Sessions"
@@ -137,14 +137,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-white/5 bg-black py-20">
+      <section className="border-t border-white/5 bg-black py-16">
         <div className="mx-auto max-w-6xl px-6 sm:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="grid items-center gap-8 lg:grid-cols-2">
             <div>
-              <h2 className="mb-6 text-3xl font-bold">
+              <h2 className="mb-5 text-3xl font-bold">
                 Why Practice with Honest Hire?
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {[
                   'AI-powered mock interviews tailored to your job application',
                   'Get instant feedback on your performance and answers',
@@ -159,7 +159,7 @@ export default function Home() {
                 ))}
               </div>
               
-              <div className="mt-8">
+              <div className="mt-6">
                 <Link href="/auth/signup">
                   <Button size="lg">
                     Start Practicing Now
@@ -221,9 +221,9 @@ function FeatureCard({
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left backdrop-blur">
       <p className="text-sm text-white/70">{label}</p>
-      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
+      <p className="mt-1.5 text-lg font-semibold text-white">{value}</p>
     </div>
   )
 }
