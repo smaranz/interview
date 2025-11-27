@@ -356,6 +356,28 @@ Use this link to understand the role and ask relevant questions about the candid
         const feedbackData = await generateInterviewFeedback(conversationHistory, jobUrl)
         setFeedback(feedbackData)
         setShowFeedback(true)
+        
+        // Save practice session to database
+        try {
+          const { savePracticeSession } = await import('@/lib/practice-sessions')
+          if (interviewDuration) {
+            const result = await savePracticeSession(
+              userId,
+              jobUrl.trim(),
+              interviewDuration,
+              conversationHistory,
+              feedbackData
+            )
+            if (result.success) {
+              console.log('Practice session saved:', result.sessionId)
+            } else {
+              console.warn('Failed to save practice session:', result.error)
+            }
+          }
+        } catch (saveError) {
+          console.error('Error saving practice session:', saveError)
+          // Don't block the UI if saving fails
+        }
       } catch (error) {
         console.error('Failed to generate feedback:', error)
         // Still show feedback modal with error message
@@ -368,6 +390,26 @@ Use this link to understand the role and ask relevant questions about the candid
           specificExamples: [],
         })
         setShowFeedback(true)
+        
+        // Try to save session even without feedback
+        try {
+          const { savePracticeSession } = await import('@/lib/practice-sessions')
+          if (interviewDuration) {
+            const conversationHistory = messages.map(msg => ({
+              role: msg.role,
+              content: msg.content,
+            }))
+            await savePracticeSession(
+              userId,
+              jobUrl.trim(),
+              interviewDuration,
+              conversationHistory,
+              null
+            )
+          }
+        } catch (saveError) {
+          console.error('Error saving practice session:', saveError)
+        }
       } finally {
         setIsGeneratingFeedback(false)
       }

@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import { Plus, Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { InterviewForm } from '@/components/InterviewForm'
-import { InterviewList } from '@/components/InterviewList'
+import { getPracticeSessions, getPracticeSessionStats } from '@/lib/practice-sessions'
+import { PracticeStats } from '@/components/PracticeStats'
+import { PracticeSessionList } from '@/components/PracticeSessionList'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -12,19 +12,11 @@ export default async function DashboardPage() {
     redirect('/auth/signin')
   }
 
-  const { data: interviews } = await supabase
-    .from('interviews')
-    .select('*')
-    .eq('creator_id', user.id)
-    .order('scheduled_at', { ascending: true })
-
-  const upcomingInterviews = interviews?.filter(
-    (i) => i.status === 'scheduled' && new Date(i.scheduled_at) >= new Date()
-  ) || []
-  
-  const pastInterviews = interviews?.filter(
-    (i) => i.status !== 'scheduled' || new Date(i.scheduled_at) < new Date()
-  ) || []
+  // Fetch practice sessions and stats
+  const [sessions, stats] = await Promise.all([
+    getPracticeSessions(user.id),
+    getPracticeSessionStats(user.id),
+  ])
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,49 +24,22 @@ export default async function DashboardPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="mt-1 text-muted-foreground">
-            Manage your interviews and practice sessions
+            View your practice session stats and history
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-8">
-            <section>
-              <div className="mb-4 flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                <h2 className="text-lg font-semibold">
-                  Upcoming Interviews
-                </h2>
-                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                  {upcomingInterviews.length}
-                </span>
-              </div>
-              <InterviewList interviews={upcomingInterviews} />
-            </section>
+        <div className="space-y-8">
+          {/* Stats Section */}
+          <section>
+            <h2 className="mb-4 text-lg font-semibold">Your Stats</h2>
+            <PracticeStats {...stats} />
+          </section>
 
-            {pastInterviews.length > 0 && (
-              <section>
-                <div className="mb-4 flex items-center gap-2">
-                  <h2 className="text-lg font-semibold">
-                    Past Interviews
-                  </h2>
-                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                    {pastInterviews.length}
-                  </span>
-                </div>
-                <InterviewList interviews={pastInterviews} />
-              </section>
-            )}
-          </div>
-
-          <div>
-            <div className="mb-4 flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">
-                New Interview
-              </h2>
-            </div>
-            <InterviewForm userId={user.id} />
-          </div>
+          {/* Practice Sessions List */}
+          <section>
+            <h2 className="mb-4 text-lg font-semibold">Practice Sessions</h2>
+            <PracticeSessionList sessions={sessions} />
+          </section>
         </div>
       </div>
     </div>

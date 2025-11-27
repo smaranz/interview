@@ -134,6 +134,53 @@ export type Database = {
           },
         ]
       }
+      practice_sessions: {
+        Row: {
+          conversation_history: Json
+          created_at: string
+          duration: string
+          feedback: Json | null
+          id: string
+          job_title: string | null
+          job_url: string
+          score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_history?: Json
+          created_at?: string
+          duration: string
+          feedback?: Json | null
+          id?: string
+          job_title?: string | null
+          job_url: string
+          score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_history?: Json
+          created_at?: string
+          duration?: string
+          feedback?: Json | null
+          id?: string
+          job_title?: string | null
+          job_url?: string
+          score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -327,6 +374,7 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"]
 export type Interview = Database["public"]["Tables"]["interviews"]["Row"]
 export type InterviewEvent = Database["public"]["Tables"]["interview_events"]["Row"]
 export type CheatSnapshot = Database["public"]["Tables"]["cheat_snapshots"]["Row"]
+export type PracticeSession = Database["public"]["Tables"]["practice_sessions"]["Row"]
 
 export type InterviewMode = Database["public"]["Enums"]["interview_mode"]
 export type InterviewStatus = Database["public"]["Enums"]["interview_status"]
