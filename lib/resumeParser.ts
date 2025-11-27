@@ -10,7 +10,21 @@ async function getPdfParserClass() {
   const pdfParseModule = require('pdf-parse')
   
   // pdf-parse v2 exports PDFParse as a class
-  return pdfParseModule.PDFParse || pdfParseModule
+  const PDFParse = pdfParseModule.PDFParse || pdfParseModule
+  
+  // In server environment, disable worker to avoid "expression is too dynamic" errors
+  // The worker is not needed for server-side parsing
+  try {
+    if (PDFParse.setWorker) {
+      // Set worker to empty string to disable it in server environment
+      PDFParse.setWorker('')
+    }
+  } catch (error) {
+    // Ignore worker setup errors - it's not critical for server-side parsing
+    console.warn('Could not configure PDF worker (this is OK for server-side):', error)
+  }
+  
+  return PDFParse
 }
 
 export interface ParseResult {
@@ -28,11 +42,19 @@ export async function extractTextFromPdf(buffer: Buffer): Promise<ParseResult> {
     
     // pdf-parse v2 uses a class-based API
     // Create an instance with the buffer data
-    const parser = new PDFParse({ data: buffer })
+    // Disable worker for server-side use to avoid dynamic import issues
+    const parser = new PDFParse({ 
+      data: buffer,
+      // Disable worker in server environment
+      useWorkerFetch: false,
+    })
     
     // Call getText() method to extract text
     const result = await parser.getText()
     const text = result.text.trim()
+    
+    // Clean up parser resources
+    await parser.destroy()
     
     if (!text) {
       return {
@@ -48,10 +70,21 @@ export async function extractTextFromPdf(buffer: Buffer): Promise<ParseResult> {
     }
   } catch (error) {
     console.error('Error parsing PDF:', error)
+    
+    // Check if it's a worker-related error
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    if (errorMessage.includes('worker') || errorMessage.includes('dynamic')) {
+      return {
+        success: false,
+        text: '',
+        error: 'PDF parsing failed due to worker configuration. Please try again or contact support.',
+      }
+    }
+    
     return {
       success: false,
       text: '',
-      error: error instanceof Error ? error.message : 'Failed to parse PDF file',
+      error: errorMessage || 'Failed to parse PDF file',
     }
   }
 }
