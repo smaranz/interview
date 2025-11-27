@@ -14,20 +14,20 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-white">
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(120,86,255,0.25),_transparent_55%)]">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,#040308,_#0a0814,#05040b)]" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-950 text-white">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNGMwIDIuMjA5LTEuNzkxIDQtNCA0cy00LTEuNzkxLTQtNCAxLjc5MS00IDQtNCA0IDEuNzkxIDQgNHptMCAwYzAtMi4yMDkgMS43OTEtNCA0LTRzNCAxLjc5MSA0IDQtMS43OTEgNC00IDQtNC0xLjc5MS00LTR6IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvZz48L3N2Zz4=')] opacity-20"></div>
         <div className="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-24 lg:flex-row lg:items-center lg:px-8">
           <div className="flex-1">
-            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-medium text-white/80 backdrop-blur">
-              <Sparkles className="h-4 w-4 text-violet-300" />
+            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-blue-400/30 bg-blue-800/30 px-5 py-2 text-sm font-medium text-blue-100 backdrop-blur">
+              <Sparkles className="h-4 w-4 text-blue-300" />
               We just helped 10k candidates practice this week
             </div>
             <h1 className="text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-6xl">
-              Meet Alex — your AI interviewer.
+              Meet Honest Hire — your AI interview platform.
             </h1>
-            <p className="mt-6 text-lg text-white/70 lg:text-xl">
-              Turn any job posting into a personalized mock interview. Alex studies the role,
+            <p className="mt-6 text-lg text-blue-100 lg:text-xl">
+              Turn any job posting into a personalized mock interview. Our AI studies the role,
               stays in character, and gives you actionable feedback so you can walk into the real
               interview confident and prepared.
             </p>
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
 
           <div className="flex-1">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+            <div className="rounded-3xl border border-blue-400/30 bg-blue-950/80 p-6 shadow-2xl backdrop-blur">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-white/70">Practice Session</p>
@@ -106,7 +106,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-white/5 bg-black py-20">
+      <section className="border-t border-blue-800/50 bg-blue-950/50 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold">
@@ -121,7 +121,7 @@ export default function Home() {
             <FeatureCard
               icon={Video}
               title="AI Practice Sessions"
-              description="Practice with our AI interviewer Alex who adapts to your responses and provides real-time feedback tailored to your job application."
+              description="Practice with our AI interviewer who adapts to your responses and provides real-time feedback tailored to your job application."
             />
             <FeatureCard
               icon={Shield}
@@ -137,7 +137,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-white/5 bg-gradient-to-b from-black via-[#05040b] to-black py-20">
+      <section className="border-t border-blue-800/50 bg-blue-950/50 py-20">
         <div className="mx-auto max-w-6xl px-6 sm:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
@@ -180,17 +180,17 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-border py-12">
+      <footer className="border-t border-blue-800/50 bg-blue-950/50 py-12">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <div className="flex items-center justify-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground">
-              <Video className="h-4 w-4 text-background" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white">
+              <Video className="h-4 w-4 text-blue-900" />
             </div>
-            <span className="text-lg font-semibold">
+            <span className="text-lg font-semibold text-white">
               Honest Hire
             </span>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">
+          <p className="mt-4 text-sm text-blue-200">
             © {new Date().getFullYear()} Honest Hire. All rights reserved.
           </p>
         </div>
@@ -209,20 +209,20 @@ function FeatureCard({
   description: string
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-6 transition-colors hover:bg-accent">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-secondary">
-        <Icon className="h-6 w-6 text-secondary-foreground" />
+    <div className="rounded-lg border border-blue-800/50 bg-blue-900/30 p-6 transition-colors hover:bg-blue-900/50 backdrop-blur-sm">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-blue-800/50">
+        <Icon className="h-6 w-6 text-blue-300" />
       </div>
-      <h3 className="mb-2 text-lg font-semibold">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
+      <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
+      <p className="text-blue-200">{description}</p>
     </div>
   )
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur">
-      <p className="text-sm text-white/70">{label}</p>
+    <div className="rounded-2xl border border-blue-400/30 bg-blue-900/30 p-5 text-left backdrop-blur">
+      <p className="text-sm text-blue-200">{label}</p>
       <p className="mt-2 text-lg font-semibold text-white">{value}</p>
     </div>
   )
