@@ -4,25 +4,33 @@ import mammoth from 'mammoth'
 
 // pdf-parse v2 uses a class-based API
 // We need to use require() for CommonJS compatibility in Next.js server environment
-async function getPdfParserClass() {
+// Set worker globally once to avoid "expression is too dynamic" errors in Next.js
+let pdfParseModuleCache: any = null
+let workerConfigured = false
+
+function getPdfParserClass() {
   // Use require() for CommonJS modules in server environment
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParseModule = require('pdf-parse')
+  if (!pdfParseModuleCache) {
+    pdfParseModuleCache = require('pdf-parse')
+  }
   
   // pdf-parse v2 exports PDFParse as a class
-  const PDFParse = pdfParseModule.PDFParse || pdfParseModule
+  const PDFParse = pdfParseModuleCache.PDFParse || pdfParseModuleCache
   
   // In server environment, disable worker to avoid "expression is too dynamic" errors
   // The worker is not needed for server-side parsing
-  try {
-    if (PDFParse.setWorker) {
-      // Set worker to null to disable it in server environment
+  // Set it once globally before any instances are created
+  if (!workerConfigured && PDFParse.setWorker) {
+    try {
+      // Set worker to empty string to disable it in server environment
       // This prevents PDF.js from trying to dynamically import worker files
-      PDFParse.setWorker(null as any)
+      PDFParse.setWorker('')
+      workerConfigured = true
+    } catch (error) {
+      // Ignore worker setup errors - it's not critical for server-side parsing
+      console.warn('Could not configure PDF worker (this is OK for server-side):', error)
     }
-  } catch (error) {
-    // Ignore worker setup errors - it's not critical for server-side parsing
-    console.warn('Could not configure PDF worker (this is OK for server-side):', error)
   }
   
   return PDFParse
@@ -39,7 +47,7 @@ export interface ParseResult {
  */
 export async function extractTextFromPdf(buffer: Buffer): Promise<ParseResult> {
   try {
-    const PDFParse = await getPdfParserClass()
+    const PDFParse = getPdfParserClass()
     
     // pdf-parse v2 uses a class-based API
     // Create an instance with the buffer data
