@@ -1,13 +1,13 @@
 # Honest Hire
 
-AI-powered interview platform with practice sessions, integrity monitoring, and Google Meet integration.
+AI-powered interview practice platform for job seekers. Practice with AI, get personalized feedback, and improve your interview skills.
 
 ## Features
 
-- **AI Practice Sessions**: Practice with an AI interviewer that adapts to your responses
-- **Integrity Monitoring**: Real-time cheat detection monitors eye contact, audio levels, and tab focus
-- **Google Meet Integration**: Seamlessly schedule and conduct live interviews with automatic Meet link generation
-- **Interview Management**: Create, schedule, and track all your interviews in one place
+- **AI Practice Sessions**: Practice with Alex, our AI interviewer that adapts to your responses and asks questions based on your job application
+- **Personalized Feedback**: Get detailed feedback after each practice session including scores, strengths, areas for improvement, and study recommendations
+- **Job-Specific Questions**: Paste any job posting link and the AI will ask relevant questions tailored to that specific role
+- **Credit-Based System**: Flexible pricing with monthly plans or pay-per-interview credits
 
 ## Tech Stack
 

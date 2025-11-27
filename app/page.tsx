@@ -10,19 +10,19 @@ export default function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-sm font-medium text-secondary-foreground">
               <Zap className="h-4 w-4" />
-              AI-Powered Interview Platform
+              Practice Interview Platform for Job Seekers
             </div>
             
             <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Conduct Interviews with{' '}
+              Practice Interviews with{' '}
               <span className="text-muted-foreground">
-                Complete Transparency
+                AI-Powered Feedback
               </span>
             </h1>
             
             <p className="mb-10 text-lg text-muted-foreground sm:text-xl">
-              Honest Hire combines AI-powered practice sessions, real-time monitoring, 
-              and seamless Google Meet integration to transform how you conduct interviews.
+              Master your interview skills with AI-powered practice sessions. Get personalized feedback, 
+              improve your answers, and build confidence before your real interviews.
             </p>
             
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -46,10 +46,10 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold">
-              Everything You Need
+              Everything You Need to Succeed
             </h2>
             <p className="text-lg text-muted-foreground">
-              A complete toolkit for modern interview workflows
+              Practice, improve, and ace your next interview
             </p>
           </div>
           
@@ -57,17 +57,17 @@ export default function Home() {
             <FeatureCard
               icon={Video}
               title="AI Practice Sessions"
-              description="Practice with our AI interviewer that adapts to your responses and provides real-time feedback."
+              description="Practice with our AI interviewer Alex who adapts to your responses and provides real-time feedback tailored to your job application."
             />
             <FeatureCard
               icon={Shield}
-              title="Smart Monitoring"
-              description="Advanced monitoring ensures interview integrity while maintaining a smooth candidate experience."
+              title="Personalized Feedback"
+              description="Get detailed feedback after each practice session including your score, strengths, areas for improvement, and study recommendations."
             />
             <FeatureCard
               icon={Users}
-              title="Google Meet Integration"
-              description="Seamlessly schedule and conduct live interviews with automatic Google Meet link generation."
+              title="Job-Specific Questions"
+              description="Paste any job posting link and our AI will ask relevant questions based on that specific role and requirements."
             />
           </div>
         </div>
@@ -78,15 +78,15 @@ export default function Home() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <h2 className="mb-6 text-3xl font-bold">
-                Why Choose Honest Hire?
+                Why Practice with Honest Hire?
               </h2>
               <div className="space-y-4">
                 {[
-                  'AI-powered mock interviews for candidate preparation',
-                  'Real-time monitoring with detailed metrics',
-                  'Seamless Google Calendar and Meet integration',
-                  'Comprehensive interview analytics and insights',
-                  'Easy scheduling and candidate management',
+                  'AI-powered mock interviews tailored to your job application',
+                  'Get instant feedback on your performance and answers',
+                  'Practice with questions specific to the role you\'re applying for',
+                  'Build confidence before your real interviews',
+                  'Identify areas to improve with personalized study recommendations',
                 ].map((feature, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-foreground" />
@@ -98,7 +98,7 @@ export default function Home() {
               <div className="mt-8">
                 <Link href="/auth/signup">
                   <Button size="lg">
-                    Start Your Free Trial
+                    Start Practicing Now
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>

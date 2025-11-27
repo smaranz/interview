@@ -10,8 +10,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Honest Hire | AI-Powered Interview Platform',
-  description: 'Conduct seamless interviews with AI-powered insights and Google Meet integration.',
+  title: 'Honest Hire | AI-Powered Interview Practice Platform',
+  description: 'Practice job interviews with AI-powered feedback. Get personalized coaching, improve your answers, and build confidence before your real interviews.',
 }
 
 export default async function RootLayout({
