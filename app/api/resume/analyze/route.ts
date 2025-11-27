@@ -1,3 +1,5 @@
+// Import polyfills first
+import '@/lib/polyfills'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { parseResumeFile, isValidResumeFileType } from '@/lib/resumeParser'

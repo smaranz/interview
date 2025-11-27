@@ -1,3 +1,5 @@
+// Import polyfills first
+import '@/lib/polyfills'
 import mammoth from 'mammoth'
 
 // pdf-parse doesn't have proper ESM exports, so we use dynamic import

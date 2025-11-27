@@ -1,3 +1,5 @@
+// Import polyfills first
+import '@/lib/polyfills'
 import * as cheerio from 'cheerio'
 import type { JobDescriptionResult } from '@/lib/types/resume'
 
