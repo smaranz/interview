@@ -211,6 +211,51 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_analyses: {
+        Row: {
+          ats_score: number
+          created_at: string
+          id: string
+          job_description_snippet: string
+          job_title: string | null
+          job_url: string
+          matched_keywords: string[]
+          missing_keywords: string[]
+          resume_text: string
+          study_plan: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ats_score: number
+          created_at?: string
+          id?: string
+          job_description_snippet: string
+          job_title?: string | null
+          job_url: string
+          matched_keywords?: string[]
+          missing_keywords?: string[]
+          resume_text: string
+          study_plan?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ats_score?: number
+          created_at?: string
+          id?: string
+          job_description_snippet?: string
+          job_title?: string | null
+          job_url?: string
+          matched_keywords?: string[]
+          missing_keywords?: string[]
+          resume_text?: string
+          study_plan?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -352,6 +397,21 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
+// Helper type for interviews table
+export type Interview = Database['public']['Tables']['interviews']['Row']
+
+// Helper type for interview mode enum
+export type InterviewMode = Database['public']['Enums']['interview_mode']
+
+// Helper type for interview status enum
+export type InterviewStatus = Database['public']['Enums']['interview_status']
+
+// Helper type for profiles table
+export type Profile = Database['public']['Tables']['profiles']['Row']
+
+// Helper type for resume analyses table
+export type ResumeAnalysis = Database['public']['Tables']['resume_analyses']['Row']
+
 export const Constants = {
   public: {
     Enums: {
@@ -368,14 +428,3 @@ export const Constants = {
     },
   },
 } as const
-
-// Convenience type aliases
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"]
-export type Interview = Database["public"]["Tables"]["interviews"]["Row"]
-export type InterviewEvent = Database["public"]["Tables"]["interview_events"]["Row"]
-export type CheatSnapshot = Database["public"]["Tables"]["cheat_snapshots"]["Row"]
-export type PracticeSession = Database["public"]["Tables"]["practice_sessions"]["Row"]
-
-export type InterviewMode = Database["public"]["Enums"]["interview_mode"]
-export type InterviewStatus = Database["public"]["Enums"]["interview_status"]
-export type EventType = Database["public"]["Enums"]["event_type"]

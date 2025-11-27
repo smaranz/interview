@@ -198,8 +198,8 @@ export function PracticeLayout({ userId }: PracticeLayoutProps) {
       }
 
       // Continue with media and session setup only if credit deduction succeeded
-      await startMedia()
-      setIsSessionActive(true)
+    await startMedia()
+    setIsSessionActive(true)
     } catch (error) {
       console.error('Error starting session:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -652,7 +652,7 @@ Use this link to understand the role and ask relevant questions about the candid
                 Paste the link to the job posting (LinkedIn, company website, etc.)
               </p>
             </div>
-
+            
             <div className="space-y-4">
               <label className="text-base font-semibold text-neutral-200">Interview Duration</label>
               <div className="grid grid-cols-2 gap-4">

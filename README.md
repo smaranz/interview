@@ -4,9 +4,10 @@ AI-powered interview practice platform for job seekers. Practice with AI, get pe
 
 ## Features
 
-- **AI Practice Sessions**: Practice with Alex, our AI interviewer that adapts to your responses and asks questions based on your job application
+- **AI Practice Sessions**: Practice with our AI interviewer that adapts to your responses and asks questions based on your job application
 - **Personalized Feedback**: Get detailed feedback after each practice session including scores, strengths, areas for improvement, and study recommendations
 - **Job-Specific Questions**: Paste any job posting link and the AI will ask relevant questions tailored to that specific role
+- **Resume Builder & ATS Matcher**: Upload your resume and a job posting to get an ATS match score, keyword analysis, and AI-generated study plan
 - **Credit-Based System**: Flexible pricing with monthly plans or pay-per-interview credits
 
 ## Tech Stack
@@ -115,18 +116,24 @@ app/
   page.tsx                # Landing page
   dashboard/page.tsx      # Authenticated dashboard
   practice/page.tsx       # AI mock interview UI
+  resume/page.tsx         # Resume Builder & ATS Matcher
   interviews/[id]/page.tsx # Interview console
   auth/
     signin/page.tsx       # Sign in page
     signup/page.tsx       # Sign up page
     callback/route.ts     # OAuth callback handler
-  api/sessions/           # API stubs for realtime features
+  api/
+    sessions/             # API stubs for realtime features
+    resume/
+      analyze/route.ts    # Resume analysis API
+      study-plan/route.ts # Study plan generation API
 
 components/
   NavBar.tsx              # Navigation bar
   InterviewForm.tsx       # Interview creation form
   InterviewList.tsx       # List of interviews
   PracticeLayout.tsx      # Practice mode UI
+  ResumeBuilder.tsx       # Resume Builder & ATS Matcher UI
   CheatMonitor.tsx        # Integrity monitoring widget
   ui/                     # Reusable UI components
 
@@ -136,6 +143,8 @@ lib/
     server.ts             # Server Supabase client
     middleware.ts         # Auth middleware helper
     types.ts              # TypeScript types (generated from Supabase MCP)
+  types/
+    resume.ts             # Resume Builder TypeScript types
   auth.ts                 # Auth helper functions
   auth/
     google.ts             # Google SSO helper functions
@@ -143,17 +152,23 @@ lib/
   realtime.ts             # OpenAI Realtime stubs
   openai.ts              # OpenAI text-based interview functions
   openai-realtime.ts     # OpenAI Realtime WebRTC client
+  resumeParser.ts        # PDF and DOCX parsing
+  jobScraper.ts          # Job posting HTML fetching and parsing
+  atsMatcher.ts          # ATS keyword matching logic
+  studyPlan.ts           # AI study plan generation
   utils.ts                # Utility functions
 ```
 
 ## Database Schema
 
-The app uses four main tables (managed via Supabase MCP):
+The app uses these main tables (managed via Supabase MCP):
 
 - **profiles**: User profiles linked to Supabase Auth
 - **interviews**: Interview sessions with scheduling info
 - **interview_events**: Event log for each interview
 - **cheat_snapshots**: Integrity monitoring snapshots
+- **practice_sessions**: AI practice interview sessions and feedback
+- **resume_analyses**: Resume ATS match results and study plans
 
 All tables have Row Level Security (RLS) enabled. TypeScript types are automatically generated from the Supabase schema.
 
@@ -188,10 +203,56 @@ This project is optimized for Vercel deployment:
 3. Add environment variables
 4. Deploy
 
+## Resume Builder & ATS Matcher
+
+The `/resume` page provides a comprehensive resume analysis tool:
+
+### Features
+
+- **Resume Upload**: Upload your resume in PDF or DOCX format
+- **Job URL Parsing**: Paste any public job posting URL (LinkedIn, Indeed, company career pages, etc.)
+- **ATS Match Score**: Get a 0-100 score based on keyword matching between your resume and the job description
+- **Keyword Analysis**: See which keywords from the job posting are present in your resume and which are missing
+- **AI Study Plan**: Generate a personalized learning path to acquire missing skills using OpenAI GPT
+
+### How It Works
+
+1. Upload your resume (PDF or DOCX)
+2. Paste a public job posting URL
+3. Click "Analyze & Match Resume"
+4. View your ATS match score and keyword breakdown
+5. Optionally generate an AI-powered study plan for missing skills
+
+### Supported File Types
+
+- PDF (`.pdf`)
+- Microsoft Word (`.docx`)
+- Note: Old `.doc` format is not supported; please convert to `.docx`
+
+### Job URL Requirements
+
+- The URL must be publicly accessible (no login required)
+- Works with most job boards and company career pages
+- The tool respects robots.txt and does not bypass any protections
+
+### Extension Points
+
+- **Enhanced Scraping**: Improve job parsing in `lib/jobScraper.ts`
+- **LLM Resume Generation**: Add tailored resume generation in a new `lib/llm.ts` module
+- **Custom Keyword Lists**: Extend `lib/atsMatcher.ts` with industry-specific keywords
+
+### Dependencies
+
+The Resume Builder uses these additional packages:
+- `pdf-parse` - PDF text extraction
+- `mammoth` - DOCX to text conversion
+- `cheerio` - HTML parsing for job descriptions
+
 ## Future Integrations
 
 - **Google Calendar API**: Real calendar event creation
 - **Google Meet API**: Actual Meet link generation
+- **AI Resume Generation**: Generate tailored resumes using LLM
 
 ## License
 

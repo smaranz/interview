@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
           { error: 'Failed to get AI response' },
           { status: 500 }
         )
-      }
+    }
 
       const data = await response.json()
       return NextResponse.json({ response: data.choices[0]?.message?.content || '' })

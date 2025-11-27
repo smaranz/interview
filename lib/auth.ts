@@ -46,20 +46,20 @@ export async function createProfileIfNotExists(userId: string, email: string, fu
       return null
     }
 
-    const supabase = await createClient()
-    
+  const supabase = await createClient()
+  
     // Check if profile already exists
     const { data: existingProfile, error: selectError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', userId)
-      .single()
-    
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .single()
+  
     // If profile exists, return it
-    if (existingProfile) {
-      return existingProfile
-    }
-    
+  if (existingProfile) {
+    return existingProfile
+  }
+  
     // If error is not "not found", log it but continue to try creating
     if (selectError && selectError.code !== 'PGRST116') {
       console.error('Error checking for existing profile:', selectError)
@@ -67,23 +67,23 @@ export async function createProfileIfNotExists(userId: string, email: string, fu
     
     // Create new profile
     const { data: newProfile, error: insertError } = await supabase
-      .from('profiles')
-      .insert({
-        id: userId,
-        email,
-        full_name: fullName ?? null,
-        avatar_url: avatarUrl ?? null,
+    .from('profiles')
+    .insert({
+      id: userId,
+      email,
+      full_name: fullName ?? null,
+      avatar_url: avatarUrl ?? null,
         credits: 0, // Initialize with 0 credits
-      })
-      .select()
-      .single()
-    
+    })
+    .select()
+    .single()
+  
     if (insertError) {
       console.error('Error creating profile:', insertError.code, insertError.message, insertError.details)
-      return null
-    }
-    
-    return newProfile
+    return null
+  }
+  
+  return newProfile
   } catch (error) {
     console.error('Exception in createProfileIfNotExists:', error)
     if (error instanceof Error) {

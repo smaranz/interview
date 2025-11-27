@@ -30,16 +30,16 @@ export default async function DashboardPage() {
 
         <div className="space-y-8">
           {/* Stats Section */}
-          <section>
+            <section>
             <h2 className="mb-4 text-lg font-semibold">Your Stats</h2>
             <PracticeStats {...stats} />
-          </section>
+            </section>
 
           {/* Practice Sessions List */}
-          <section>
+              <section>
             <h2 className="mb-4 text-lg font-semibold">Practice Sessions</h2>
             <PracticeSessionList sessions={sessions} />
-          </section>
+              </section>
         </div>
       </div>
     </div>
