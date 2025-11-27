@@ -2,15 +2,15 @@
 import '@/lib/polyfills'
 import mammoth from 'mammoth'
 
-// pdf-parse doesn't have proper ESM exports, so we use dynamic import
-async function getPdfParser() {
-  // Use dynamic import which works better in Next.js server environment
-  // pdf-parse exports as a namespace, and the function is callable directly
-  const pdfParseModule = await import('pdf-parse')
+// pdf-parse v2 uses a class-based API
+// We need to use require() for CommonJS compatibility in Next.js server environment
+async function getPdfParserClass() {
+  // Use require() for CommonJS modules in server environment
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParseModule = require('pdf-parse')
   
-  // The module itself should be callable, but TypeScript doesn't know that
-  // We need to cast it appropriately
-  return pdfParseModule as unknown as (buffer: Buffer) => Promise<{ text: string }>
+  // pdf-parse v2 exports PDFParse as a class
+  return pdfParseModule.PDFParse || pdfParseModule
 }
 
 export interface ParseResult {
@@ -24,21 +24,15 @@ export interface ParseResult {
  */
 export async function extractTextFromPdf(buffer: Buffer): Promise<ParseResult> {
   try {
-    const pdfParse = await getPdfParser()
+    const PDFParse = await getPdfParserClass()
     
-    // Ensure pdfParse is a function
-    if (typeof pdfParse !== 'function') {
-      console.error('PDF parser is not a function:', typeof pdfParse, pdfParse)
-      return {
-        success: false,
-        text: '',
-        error: 'PDF parser is not available or not properly loaded',
-      }
-    }
+    // pdf-parse v2 uses a class-based API
+    // Create an instance with the buffer data
+    const parser = new PDFParse({ data: buffer })
     
-    // Call the function - pdf-parse expects a Buffer and returns a promise
-    const data = await pdfParse(buffer)
-    const text = data.text.trim()
+    // Call getText() method to extract text
+    const result = await parser.getText()
+    const text = result.text.trim()
     
     if (!text) {
       return {
