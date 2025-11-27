@@ -69,10 +69,10 @@ export default function Home() {
 
               <div className="mt-6 space-y-5 rounded-2xl bg-black/30 p-5">
                 <div>
-                  <p className="text-sm text-violet-300">Alex</p>
+                  <p className="text-sm text-blue-300">AI Interviewer</p>
                   <p className="text-base text-white">
-                    “Hi, I&apos;m Alex. I&apos;ll be conducting your interview today. Let&apos;s start with a quick
-                    introduction—tell me about your background and what drew you to this role.”
+                    "Hi, I&apos;ll be conducting your interview today. Let&apos;s start with a quick
+                    introduction—tell me about your background and what drew you to this role."
                   </p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
