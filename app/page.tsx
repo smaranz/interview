@@ -14,19 +14,19 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-950 text-white">
+    <div className="min-h-screen bg-black text-white">
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNGMwIDIuMjA5LTEuNzkxIDQtNCA0cy00LTEuNzkxLTQtNCAxLjc5MS00IDQtNCA0IDEuNzkxIDQgNHptMCAwYzAtMi4yMDkgMS43OTEtNCA0LTRzNCAxLjc5MSA0IDQtMS43OTEgNC00IDQtNC0xLjc5MS00LTR6IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvZz48L3N2Zz4=')] opacity-20"></div>
         <div className="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-24 lg:flex-row lg:items-center lg:px-8">
           <div className="flex-1">
-            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-blue-400/30 bg-blue-800/30 px-5 py-2 text-sm font-medium text-blue-100 backdrop-blur">
-              <Sparkles className="h-4 w-4 text-blue-300" />
+            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-medium text-white/80 backdrop-blur">
+              <Sparkles className="h-4 w-4 text-white/60" />
               We just helped 10k candidates practice this week
             </div>
             <h1 className="text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-6xl">
               Meet Honest Hire — your AI interview platform.
             </h1>
-            <p className="mt-6 text-lg text-blue-100 lg:text-xl">
+            <p className="mt-6 text-lg text-white/70 lg:text-xl">
               Turn any job posting into a personalized mock interview. Our AI studies the role,
               stays in character, and gives you actionable feedback so you can walk into the real
               interview confident and prepared.
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
 
           <div className="flex-1">
-            <div className="rounded-3xl border border-blue-400/30 bg-blue-950/80 p-6 shadow-2xl backdrop-blur">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-white/70">Practice Session</p>
@@ -69,7 +69,7 @@ export default function Home() {
 
               <div className="mt-6 space-y-5 rounded-2xl bg-black/30 p-5">
                 <div>
-                  <p className="text-sm text-blue-300">AI Interviewer</p>
+                  <p className="text-sm text-white/60">AI Interviewer</p>
                   <p className="text-base text-white">
                     "Hi, I&apos;ll be conducting your interview today. Let&apos;s start with a quick
                     introduction—tell me about your background and what drew you to this role."
@@ -106,7 +106,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-blue-800/50 bg-blue-950/50 py-20">
+      <section className="border-t border-white/5 bg-black py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold">
@@ -137,7 +137,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-blue-800/50 bg-blue-950/50 py-20">
+      <section className="border-t border-white/5 bg-black py-20">
         <div className="mx-auto max-w-6xl px-6 sm:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
@@ -180,7 +180,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-blue-800/50 bg-blue-950/50 py-12">
+      <footer className="border-t border-white/5 bg-black py-12">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <div className="flex items-center justify-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white">
@@ -190,7 +190,7 @@ export default function Home() {
               Honest Hire
             </span>
           </div>
-          <p className="mt-4 text-sm text-blue-200">
+          <p className="mt-4 text-sm text-white/60">
             © {new Date().getFullYear()} Honest Hire. All rights reserved.
           </p>
         </div>
@@ -209,20 +209,20 @@ function FeatureCard({
   description: string
 }) {
   return (
-    <div className="rounded-lg border border-blue-800/50 bg-blue-900/30 p-6 transition-colors hover:bg-blue-900/50 backdrop-blur-sm">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-blue-800/50">
-        <Icon className="h-6 w-6 text-blue-300" />
+    <div className="rounded-lg border border-white/10 bg-white/5 p-6 transition-colors hover:bg-white/10 backdrop-blur-sm">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-white/10">
+        <Icon className="h-6 w-6 text-white/80" />
       </div>
       <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
-      <p className="text-blue-200">{description}</p>
+      <p className="text-white/70">{description}</p>
     </div>
   )
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-blue-400/30 bg-blue-900/30 p-5 text-left backdrop-blur">
-      <p className="text-sm text-blue-200">{label}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur">
+      <p className="text-sm text-white/70">{label}</p>
       <p className="mt-2 text-lg font-semibold text-white">{value}</p>
     </div>
   )
