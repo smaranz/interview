@@ -3,10 +3,14 @@ import '@/lib/polyfills'
 import mammoth from 'mammoth'
 
 // pdf-parse doesn't have proper ESM exports, so we use dynamic import
-async function getPdfParser(): Promise<(buffer: Buffer) => Promise<{ text: string }>> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse')
-  return pdfParse
+async function getPdfParser() {
+  // Use dynamic import which works better in Next.js server environment
+  // pdf-parse exports as a namespace, and the function is callable directly
+  const pdfParseModule = await import('pdf-parse')
+  
+  // The module itself should be callable, but TypeScript doesn't know that
+  // We need to cast it appropriately
+  return pdfParseModule as unknown as (buffer: Buffer) => Promise<{ text: string }>
 }
 
 export interface ParseResult {
@@ -21,6 +25,18 @@ export interface ParseResult {
 export async function extractTextFromPdf(buffer: Buffer): Promise<ParseResult> {
   try {
     const pdfParse = await getPdfParser()
+    
+    // Ensure pdfParse is a function
+    if (typeof pdfParse !== 'function') {
+      console.error('PDF parser is not a function:', typeof pdfParse, pdfParse)
+      return {
+        success: false,
+        text: '',
+        error: 'PDF parser is not available or not properly loaded',
+      }
+    }
+    
+    // Call the function - pdf-parse expects a Buffer and returns a promise
     const data = await pdfParse(buffer)
     const text = data.text.trim()
     
