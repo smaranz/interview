@@ -16,8 +16,9 @@ async function getPdfParserClass() {
   // The worker is not needed for server-side parsing
   try {
     if (PDFParse.setWorker) {
-      // Set worker to empty string to disable it in server environment
-      PDFParse.setWorker('')
+      // Set worker to null to disable it in server environment
+      // This prevents PDF.js from trying to dynamically import worker files
+      PDFParse.setWorker(null as any)
     }
   } catch (error) {
     // Ignore worker setup errors - it's not critical for server-side parsing
