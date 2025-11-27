@@ -1,48 +1,112 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Video, Shield, Zap, Users, ArrowRight, CheckCircle } from 'lucide-react'
+import {
+  Video,
+  Shield,
+  Zap,
+  Users,
+  ArrowRight,
+  CheckCircle,
+  Clock,
+  Star,
+  Sparkles,
+} from 'lucide-react'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
-      <section className="relative">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-sm font-medium text-secondary-foreground">
-              <Zap className="h-4 w-4" />
-              Practice Interview Platform for Job Seekers
+    <div className="min-h-screen bg-background text-white">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(120,86,255,0.25),_transparent_55%)]">
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,#040308,_#0a0814,#05040b)]" />
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-24 lg:flex-row lg:items-center lg:px-8">
+          <div className="flex-1">
+            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-medium text-white/80 backdrop-blur">
+              <Sparkles className="h-4 w-4 text-violet-300" />
+              We just helped 10k candidates practice this week
             </div>
-            
-            <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Practice Interviews with{' '}
-              <span className="text-muted-foreground">
-                AI-Powered Feedback
-              </span>
+            <h1 className="text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-6xl">
+              Meet Alex — your AI interviewer.
             </h1>
-            
-            <p className="mb-10 text-lg text-muted-foreground sm:text-xl">
-              Master your interview skills with AI-powered practice sessions. Get personalized feedback, 
-              improve your answers, and build confidence before your real interviews.
+            <p className="mt-6 text-lg text-white/70 lg:text-xl">
+              Turn any job posting into a personalized mock interview. Alex studies the role,
+              stays in character, and gives you actionable feedback so you can walk into the real
+              interview confident and prepared.
             </p>
-            
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link href="/auth/signup">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Get Started Free
+                <Button className="w-full bg-white text-black hover:bg-white/80 sm:w-auto" size="lg">
+                  Get Started – It&apos;s Free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/auth/signin">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                  Sign In
+              <Link href="/practice">
+                <Button
+                  variant="outline"
+                  className="w-full border-white/20 bg-transparent text-white hover:bg-white/10 sm:w-auto"
+                  size="lg"
+                >
+                  See Practice Mode
                 </Button>
               </Link>
+            </div>
+            <div className="mt-12 grid gap-6 sm:grid-cols-2">
+              <StatCard label="Live voice interviews" value="Realtime OpenAI" />
+              <StatCard label="Detailed feedback" value="Scores • Strengths • Study plan" />
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">Practice Session</p>
+                  <h3 className="text-xl font-semibold text-white">Product Manager Mock Interview</h3>
+                </div>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">
+                  <Clock className="mr-1 inline-flex h-4 w-4" />
+                  25 min
+                </span>
+              </div>
+
+              <div className="mt-6 space-y-5 rounded-2xl bg-black/30 p-5">
+                <div>
+                  <p className="text-sm text-violet-300">Alex</p>
+                  <p className="text-base text-white">
+                    “Hi, I&apos;m Alex. I&apos;ll be conducting your interview today. Let&apos;s start with a quick
+                    introduction—tell me about your background and what drew you to this role.”
+                  </p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-sm text-white/80">Key areas we&apos;ll cover</p>
+                  <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-white/70">
+                    <li>Leadership in ambiguous environments</li>
+                    <li>Metrics mindset for product decisions</li>
+                    <li>How you collaborate with engineering</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4 rounded-2xl border border-white/10 bg-black/40 p-5 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm text-white/60">Score last session</p>
+                  <p className="text-2xl font-semibold text-white">
+                    87
+                    <span className="ml-1 text-sm font-normal text-emerald-300">Great progress</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-white/60">Recommendations</p>
+                  <p className="flex items-center gap-1 text-white">
+                    <Star className="h-4 w-4 text-yellow-300" />
+                    Deepen your STAR stories
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-border py-20">
+      <section className="border-t border-white/5 bg-black py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold">
@@ -73,8 +137,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-border py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="border-t border-white/5 bg-gradient-to-b from-black via-[#05040b] to-black py-20">
+        <div className="mx-auto max-w-6xl px-6 sm:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <h2 className="mb-6 text-3xl font-bold">
@@ -151,6 +215,15 @@ function FeatureCard({
       </div>
       <h3 className="mb-2 text-lg font-semibold">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
+    </div>
+  )
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur">
+      <p className="text-sm text-white/70">{label}</p>
+      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
     </div>
   )
 }
