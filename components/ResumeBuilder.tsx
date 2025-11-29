@@ -198,15 +198,18 @@ export default function ResumeBuilder() {
               />
             </div>
             <p className="mt-1 text-xs text-white/50">
-              Paste a public job posting URL (LinkedIn, Indeed, company career page, etc.)
+              Paste a public job posting URL. Note: Sites like LinkedIn/Indeed may block access. Use the company's career page if possible.
             </p>
           </div>
           
           {/* Error Message */}
           {error && (
-            <div className="flex items-start gap-2 rounded-lg bg-red-500/10 p-3 text-red-400">
+            <div className="flex items-start gap-2 rounded-lg bg-red-500/10 p-3 text-red-400 border border-red-500/20">
               <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-              <p className="text-sm">{error}</p>
+              <div>
+                 <p className="text-sm font-medium">Analysis Failed</p>
+                 <p className="text-sm mt-1 opacity-90">{error}</p>
+              </div>
             </div>
           )}
           

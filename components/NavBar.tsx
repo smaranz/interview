@@ -89,7 +89,7 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pointer-events-auto">
           <div className={cn(
-            "flex items-center justify-between rounded-full px-6 h-14 transition-all duration-300",
+            "relative flex items-center justify-between rounded-full px-6 h-14 transition-all duration-300",
             // Always apply glass style to match the example
             "bg-black/40 border border-white/10 shadow-lg backdrop-blur-xl supports-[backdrop-filter]:bg-black/20"
           )}>
@@ -102,8 +102,9 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
                   Preppo
                 </span>
               </Link>
+            </div>
               
-              <div className="hidden md:flex md:items-center md:gap-1">
+            <div className="hidden md:absolute md:left-1/2 md:-translate-x-1/2 md:flex md:items-center md:gap-1">
                 {navigation.map((item) => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
@@ -130,7 +131,6 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
                     </Link>
                   )
                 })}
-              </div>
             </div>
             
             <div className="hidden md:flex md:items-center md:gap-4">

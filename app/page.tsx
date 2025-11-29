@@ -42,8 +42,8 @@ export default function Home() {
     <div className="relative min-h-screen overflow-hidden bg-black text-white selection:bg-white/20">
       <NebulaBackground />
       
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32">
-        <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6 lg:flex-row lg:items-center lg:px-8">
+      <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-20">
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 lg:flex-row lg:items-center lg:px-8">
           <motion.div 
             variants={container}
             initial="hidden"
@@ -69,7 +69,7 @@ export default function Home() {
               stays in character, and gives you actionable feedback to help you land the job.
             </motion.p>
             
-            <motion.div variants={item} className="mt-10 flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
+            <motion.div variants={item} className="mt-6 flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
               <Link href="/auth/signup">
                 <Button className="h-12 w-full rounded-full bg-white px-8 text-base font-semibold text-black transition-all hover:bg-white/90 hover:scale-105 sm:w-auto shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                   Get Started
@@ -87,7 +87,7 @@ export default function Home() {
               </Link>
             </motion.div>
             
-            <motion.div variants={item} className="mt-12 flex items-center justify-center gap-8 lg:justify-start opacity-60">
+            <motion.div variants={item} className="mt-8 flex items-center justify-center gap-8 lg:justify-start opacity-60">
                <div className="text-sm font-medium text-white/40">
                  Trusted by 10,000+ candidates
                </div>
@@ -151,9 +151,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative border-t border-white/5 bg-black/50 py-24 backdrop-blur-sm">
+      <section className="relative border-t border-white/5 bg-black/50 py-16 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mb-16 text-center">
+          <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
               Everything you need to <span className="text-white/80">succeed</span>
             </h2>
@@ -182,7 +182,7 @@ export default function Home() {
         </div>
       </section>
       
-       <section className="relative py-24">
+       <section className="relative py-16">
          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent pointer-events-none" />
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
              <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 items-center">
