@@ -71,6 +71,7 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
       ]
 
   const handleSignOut = async () => {
+    setUserMenuOpen(false)
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
@@ -139,7 +140,7 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 px-3 py-1.5 transition-colors border border-white/5 hover:border-white/10"
                   >
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">
+                    <div className="h-6 w-6 rounded-full bg-white flex items-center justify-center text-xs font-bold text-black">
                       {firstName.charAt(0)}
                     </div>
                     <span className="text-sm font-medium text-white">
@@ -242,7 +243,7 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
                 {user ? (
                   <>
                     <div className="flex items-center gap-3 px-4 py-2 mb-2">
-                       <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
+                       <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-sm font-bold text-black">
                           {firstName.charAt(0)}
                        </div>
                        <div>

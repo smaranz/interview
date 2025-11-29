@@ -147,21 +147,6 @@ export default function Home() {
             </div>
             
             {/* Floating elements */}
-            <motion.div 
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -right-8 top-48 rounded-xl border border-white/10 bg-black/80 p-4 shadow-xl backdrop-blur-md z-20"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  <CheckCircle className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Great articulation!</p>
-                  <p className="text-xs text-white/50">AI Feedback</p>
-                </div>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </section>

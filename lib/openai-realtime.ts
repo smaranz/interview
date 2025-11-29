@@ -362,6 +362,33 @@ export class OpenAIRealtimeClient {
     }
   }
 
+  private enableUserAudio() {
+    if (this.hasAlexSpokenFirst) return // Already enabled
+
+    this.hasAlexSpokenFirst = true
+    console.log('Enabling user input (fallback or normal flow)')
+    
+    // Enable voice activity detection
+    this.sendEvent({
+      type: 'session.update',
+      session: {
+        type: 'realtime',
+        audio: {
+          voice_activity_detection: {
+            enabled: true,
+          },
+        },
+      },
+    })
+    
+    // Unmute the microphone
+    if (this.mediaStream) {
+      this.mediaStream.getAudioTracks().forEach((track) => {
+        track.enabled = true
+      })
+    }
+  }
+
   private startConversation() {
     if (!this.sessionReady) {
       console.log('Session not ready yet, waiting for session.updated event')
@@ -390,6 +417,14 @@ DO NOT say "How can I help you" or act like an assistant. You are an INTERVIEWER
         modalities: ['audio'], // Explicitly request audio output
       },
     })
+
+    // Fallback: If Alex doesn't speak within 10 seconds, enable user input to prevent getting stuck
+    setTimeout(() => {
+      if (!this.hasAlexSpokenFirst) {
+        console.warn('Alex took too long to speak. Enabling user input as fallback.')
+        this.enableUserAudio()
+      }
+    }, 10000)
   }
 
   private handleServerEvent(event: any) {
@@ -410,28 +445,8 @@ DO NOT say "How can I help you" or act like an assistant. You are an INTERVIEWER
       
       // After Alex finishes speaking for the first time, enable user input
       if (!this.hasAlexSpokenFirst) {
-        this.hasAlexSpokenFirst = true
         console.log('Alex has spoken first, now enabling user input')
-        
-        // Enable voice activity detection
-        this.sendEvent({
-          type: 'session.update',
-          session: {
-            type: 'realtime',
-            audio: {
-              voice_activity_detection: {
-                enabled: true,
-              },
-            },
-          },
-        })
-        
-        // Unmute the microphone
-        if (this.mediaStream) {
-          this.mediaStream.getAudioTracks().forEach((track) => {
-            track.enabled = true
-          })
-        }
+        this.enableUserAudio()
       }
       
       this.activeResponse = ''

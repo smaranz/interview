@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { CreditCard, User, Shield } from 'lucide-react'
+import { CreditCard, User } from 'lucide-react'
+import { UpgradeButton, BuyCreditsButton, CancelSubscriptionButton } from './SettingsActions'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -65,9 +65,7 @@ export default async function SettingsPage() {
                 <div className="font-medium text-white">Current Plan</div>
                 <div className="text-sm text-white/60">Free Tier</div>
               </div>
-              <Button variant="outline" className="border-white/10 hover:bg-white/5 text-white">
-                Upgrade Plan
-              </Button>
+              <UpgradeButton />
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
@@ -75,16 +73,12 @@ export default async function SettingsPage() {
                 <div className="font-medium text-white">Available Credits</div>
                 <div className="text-sm text-white/60">{profile?.credits || 0} credits remaining</div>
               </div>
-              <Button variant="outline" className="border-white/10 hover:bg-white/5 text-white">
-                Buy More
-              </Button>
+              <BuyCreditsButton />
             </div>
 
             <div className="pt-4 border-t border-white/10">
               <h4 className="text-sm font-medium text-white mb-4">Danger Zone</h4>
-              <Button variant="destructive" className="bg-red-900/20 text-red-400 hover:bg-red-900/40 border border-red-900/50">
-                Cancel Subscription
-              </Button>
+              <CancelSubscriptionButton />
             </div>
           </CardContent>
         </Card>
