@@ -87,18 +87,7 @@ export default function Home() {
               </Link>
             </motion.div>
             
-            <motion.div variants={item} className="mt-12 flex items-center justify-center gap-8 lg:justify-start grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-               <div className="flex -space-x-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-10 w-10 rounded-full border-2 border-black bg-neutral-800 overflow-hidden">
-                    <img 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}&backgroundColor=b6e3f4,c0aede,d1d4f9`}
-                      alt="User avatar"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ))}
-               </div>
+            <motion.div variants={item} className="mt-12 flex items-center justify-center gap-8 lg:justify-start opacity-60">
                <div className="text-sm font-medium text-white/40">
                  Trusted by 10,000+ candidates
                </div>
@@ -106,86 +95,53 @@ export default function Home() {
           </motion.div>
 
           <motion.div 
-            initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, type: "spring" }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
             className="flex-1 relative hidden lg:block"
           >
-            {/* Glassmorphic Interface Mockup - Monochrome Edition */}
+            {/* Glassmorphic Interface Mockup - Video Call Style */}
             <div className="relative rounded-3xl border border-white/10 bg-black/40 p-2 shadow-2xl backdrop-blur-xl">
               <div className="absolute -inset-1 rounded-3xl bg-white/5 blur-xl opacity-50" />
               
-              <div className="relative rounded-2xl border border-white/5 bg-black/50 p-6 overflow-hidden">
-                 {/* Header */}
-                 <div className="flex items-center justify-between mb-8">
-                   <div className="flex items-center gap-3">
-                     <div className="h-10 w-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                        <Video className="h-5 w-5 text-white" />
-                     </div>
-                     <div>
-                       <h3 className="text-lg font-semibold text-white">Product Manager</h3>
-                       <p className="text-xs text-white/50">Mock Interview • 25m remaining</p>
-                     </div>
+              <div className="relative aspect-video rounded-2xl border border-white/5 bg-neutral-900 overflow-hidden flex flex-col">
+                 {/* Video Content Area */}
+                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-20" />
+                 
+                 {/* Main Avatar Placeholder (User) */}
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-32 w-32 rounded-full bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm">
+                      <div className="h-24 w-24 rounded-full bg-neutral-800 flex items-center justify-center">
+                        <Users className="h-12 w-12 text-white/20" />
+                      </div>
+                    </div>
+                 </div>
+
+                 {/* Status Indicators */}
+                 <div className="absolute top-6 right-6 flex flex-col gap-3 z-10">
+                   <div className="flex items-center gap-2 rounded-full px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-md">
+                     <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                     <span className="text-xs font-medium text-emerald-200">Live Voice Active</span>
                    </div>
-                   <div className="flex gap-2">
-                     <span className="h-3 w-3 rounded-full bg-white/10" />
-                     <span className="h-3 w-3 rounded-full bg-white/10" />
-                     <span className="h-3 w-3 rounded-full bg-white/10" />
+                   <div className="flex items-center gap-2 rounded-full px-4 py-2 bg-blue-500/20 border border-blue-500/30 backdrop-blur-md">
+                     <Clock className="h-3 w-3 text-blue-200" />
+                     <span className="text-xs font-medium text-blue-200">14:20 remaining</span>
                    </div>
                  </div>
 
-                 {/* Chat Area */}
-                 <div className="space-y-6">
-                   <div className="flex gap-4">
-                     <div className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0 flex items-center justify-center border border-white/10">
-                       <Sparkles className="h-4 w-4 text-white/70" />
-                     </div>
-                     <div className="flex-1 space-y-2">
-                       <p className="text-sm text-white/40">AI Interviewer</p>
-                       <div className="rounded-2xl rounded-tl-none border border-white/5 bg-white/5 p-4 text-white/90 shadow-sm">
-                         <p>Can you describe a time when you had to make a difficult product tradeoff decision? What was your framework?</p>
-                       </div>
+                 {/* Controls Bar */}
+                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10">
+                   <div className="h-12 w-12 rounded-full bg-white/10 border border-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                     <div className="h-5 w-5 text-white" >
+                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                      </div>
                    </div>
-
-                   <div className="flex gap-4 flex-row-reverse">
-                     <div className="h-8 w-8 rounded-full bg-white/20 flex-shrink-0 border border-white/10" />
-                     <div className="flex-1 space-y-2 text-right">
-                       <p className="text-sm text-white/40">You</p>
-                       <div className="rounded-2xl rounded-tr-none bg-white text-black p-4 shadow-lg">
-                         <p>In my last role, I used the RICE scoring model to prioritize...</p>
-                         <div className="mt-2 flex gap-1 justify-end">
-                            <span className="h-1.5 w-1.5 rounded-full bg-black animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="h-1.5 w-1.5 rounded-full bg-black animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="h-1.5 w-1.5 rounded-full bg-black animate-bounce" style={{ animationDelay: '300ms' }} />
-                         </div>
-                       </div>
-                     </div>
+                   <div className="h-12 w-12 rounded-full bg-white/10 border border-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                     <Video className="h-5 w-5 text-white" />
                    </div>
-                 </div>
-
-                 {/* Stats Overlay */}
-                 <div className="mt-8 grid grid-cols-2 gap-4">
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 backdrop-blur-md">
-                      <p className="text-xs text-white/40 mb-1">Confidence Score</p>
-                      <div className="flex items-end gap-2">
-                        <span className="text-2xl font-bold text-white">92</span>
-                        <span className="text-xs text-white/50 mb-1">↑ 4%</span>
-                      </div>
-                      <div className="mt-2 h-1 w-full rounded-full bg-white/5 overflow-hidden">
-                        <div className="h-full w-[92%] bg-white rounded-full" />
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 backdrop-blur-md">
-                      <p className="text-xs text-white/40 mb-1">Clarity</p>
-                      <div className="flex items-end gap-2">
-                        <span className="text-2xl font-bold text-white">8.5</span>
-                        <span className="text-xs text-white/50 mb-1">/ 10</span>
-                      </div>
-                       <div className="mt-2 h-1 w-full rounded-full bg-white/5 overflow-hidden">
-                        <div className="h-full w-[85%] bg-white/70 rounded-full" />
-                      </div>
-                    </div>
+                   <div className="h-12 w-12 rounded-full bg-red-500/80 border border-red-500/50 backdrop-blur-md flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer shadow-lg shadow-red-500/20">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-white"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>
+                   </div>
                  </div>
               </div>
             </div>
@@ -194,15 +150,15 @@ export default function Home() {
             <motion.div 
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -right-8 top-20 rounded-xl border border-white/10 bg-black/60 p-4 shadow-xl backdrop-blur-md"
+              className="absolute -right-8 top-20 rounded-xl border border-white/10 bg-black/80 p-4 shadow-xl backdrop-blur-md z-20"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white">
-                  <CheckCircle className="h-6 w-6" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <CheckCircle className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white">Great answer!</p>
-                  <p className="text-xs text-white/50">STAR method applied</p>
+                  <p className="text-sm font-medium text-white">Great articulation!</p>
+                  <p className="text-xs text-white/50">AI Feedback</p>
                 </div>
               </div>
             </motion.div>

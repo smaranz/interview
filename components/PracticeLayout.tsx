@@ -14,6 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCreditInfo, deductCredits, type InterviewDuration, CREDIT_COSTS } from '@/lib/credits'
 import { Clock } from 'lucide-react'
 
+const LOCAL_CREDIT_COSTS = {
+  '10min': 15,
+  '25min': 30,
+}
+
 interface AIMessage {
   id: string
   role: 'user' | 'assistant'
@@ -680,7 +685,7 @@ Use this link to understand the role and ask relevant questions about the candid
             
             <div className="space-y-4">
               <label className="text-sm font-semibold text-white/80">Interview Duration</label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -693,16 +698,40 @@ Use this link to understand the role and ask relevant questions about the candid
                   }}
                   disabled={credits === null || (typeof credits === 'number' && credits < 15)}
                   className={cn(
-                    "rounded-xl border-2 p-6 text-left transition-all cursor-pointer",
+                    "relative group flex flex-col items-start p-6 rounded-2xl border transition-all duration-300 h-full",
                     selectedDuration === '10min'
-                      ? "border-white bg-white text-black shadow-lg"
-                      : "border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10",
-                    (credits === null || (typeof credits === 'number' && credits < 15)) && "opacity-50 cursor-not-allowed"
+                      ? "border-white bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)] scale-[1.02]"
+                      : "border-white/10 bg-white/5 text-white hover:border-white/30 hover:bg-white/10",
+                    (credits === null || (typeof credits === 'number' && credits < 15)) && "opacity-50 cursor-not-allowed hover:border-white/10 hover:bg-white/5"
                   )}
                 >
-                  <div className="font-bold text-lg">10 Minutes</div>
-                  <div className="text-sm mt-2 text-white/60">15 credits</div>
+                  <div className={cn(
+                    "mb-4 flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+                    selectedDuration === '10min' ? "bg-black/10 text-black" : "bg-white/10 text-white"
+                  )}>
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <div className="font-bold text-xl mb-1">10 Minutes</div>
+                  <div className={cn(
+                    "text-sm mb-4",
+                    selectedDuration === '10min' ? "text-black/60" : "text-white/40"
+                  )}>
+                    Quick practice session
+                  </div>
+                  <div className={cn(
+                    "mt-auto text-xs font-medium px-2 py-1 rounded-full",
+                    selectedDuration === '10min' ? "bg-black/10 text-black" : "bg-white/10 text-white/60"
+                  )}>
+                    15 Credits
+                  </div>
+                  {/* Checkmark for selected state */}
+                  {selectedDuration === '10min' && (
+                    <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-black text-white flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                  )}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -715,21 +744,58 @@ Use this link to understand the role and ask relevant questions about the candid
                   }}
                   disabled={credits === null || (typeof credits === 'number' && credits < 30)}
                   className={cn(
-                    "rounded-xl border-2 p-6 text-left transition-all cursor-pointer",
+                    "relative group flex flex-col items-start p-6 rounded-2xl border transition-all duration-300 h-full",
                     selectedDuration === '25min'
-                      ? "border-white bg-white text-black shadow-lg"
-                      : "border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10",
-                    (credits === null || (typeof credits === 'number' && credits < 30)) && "opacity-50 cursor-not-allowed"
+                      ? "border-white bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)] scale-[1.02]"
+                      : "border-white/10 bg-white/5 text-white hover:border-white/30 hover:bg-white/10",
+                    (credits === null || (typeof credits === 'number' && credits < 30)) && "opacity-50 cursor-not-allowed hover:border-white/10 hover:bg-white/5"
                   )}
                 >
-                  <div className="font-bold text-lg">25 Minutes</div>
-                  <div className="text-sm mt-2 text-white/60">30 credits</div>
+                  <div className={cn(
+                    "mb-4 flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+                    selectedDuration === '25min' ? "bg-black/10 text-black" : "bg-white/10 text-white"
+                  )}>
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <div className="font-bold text-xl mb-1">25 Minutes</div>
+                  <div className={cn(
+                    "text-sm mb-4",
+                    selectedDuration === '25min' ? "text-black/60" : "text-white/40"
+                  )}>
+                    Deep dive interview
+                  </div>
+                  <div className={cn(
+                    "mt-auto text-xs font-medium px-2 py-1 rounded-full",
+                    selectedDuration === '25min' ? "bg-black/10 text-black" : "bg-white/10 text-white/60"
+                  )}>
+                    30 Credits
+                  </div>
+                  {/* Checkmark for selected state */}
+                  {selectedDuration === '25min' && (
+                    <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-black text-white flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                  )}
                 </button>
               </div>
               {selectedDuration && (
-                <p className="text-sm text-white/50">
-                  Selected: {selectedDuration === '10min' ? '10 minutes' : '25 minutes'} interview ({CREDIT_COSTS[selectedDuration]} credits)
-                </p>
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 p-4 rounded-xl bg-white/5 border border-white/10"
+                >
+                  <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">
+                      Selected: {selectedDuration === '10min' ? '10 minutes' : '25 minutes'} session
+                    </p>
+                    <p className="text-xs text-white/50">
+                      Cost: {LOCAL_CREDIT_COSTS[selectedDuration]} credits
+                    </p>
+                  </div>
+                </motion.div>
               )}
             </div>
 
