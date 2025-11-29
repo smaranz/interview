@@ -10,7 +10,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Honest Hire | AI-Powered Interview Practice Platform',
+  title: 'Preppo | AI-Powered Interview Practice Platform',
   description: 'Practice job interviews with AI-powered feedback. Get personalized coaching, improve your answers, and build confidence before your real interviews.',
 }
 

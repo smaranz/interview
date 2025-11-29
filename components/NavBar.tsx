@@ -69,7 +69,7 @@ export function NavBar({ user }: NavBarProps) {
                   <Video className="h-4 w-4" />
                 </div>
                 <span className="text-lg font-bold tracking-tight text-white transition-colors">
-                  Honest Hire
+                  Preppo
                 </span>
               </Link>
               

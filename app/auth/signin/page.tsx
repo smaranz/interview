@@ -66,7 +66,7 @@ export default function SignInPage() {
             Welcome back
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Sign in to your Honest Hire account
+            Sign in to your Preppo account
           </p>
         </div>
 

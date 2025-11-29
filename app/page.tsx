@@ -55,7 +55,7 @@ export default function Home() {
               <span className="font-medium">New: AI Voice Interviews</span>
               <div className="ml-1 h-4 w-[1px] bg-white/20" />
               <span className="flex items-center gap-1 text-white/50">
-                Try for free <ArrowRight className="h-3 w-3" />
+                Get started <ArrowRight className="h-3 w-3" />
               </span>
             </motion.div>
             
@@ -72,7 +72,7 @@ export default function Home() {
             <motion.div variants={item} className="mt-10 flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
               <Link href="/auth/signup">
                 <Button className="h-12 w-full rounded-full bg-white px-8 text-base font-semibold text-black transition-all hover:bg-white/90 hover:scale-105 sm:w-auto shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                  Get Started Free
+                  Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -241,7 +241,7 @@ export default function Home() {
              <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 items-center">
                <div>
                  <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                   Why practice with <span className="text-white/80">Honest Hire?</span>
+                   Why practice with <span className="text-white/80">Preppo?</span>
                  </h2>
                  <p className="mt-6 text-lg text-white/60">
                    Most candidates fail because they don't practice out loud. We provide a safe space to fail, learn, and improve before it counts.
@@ -309,11 +309,11 @@ export default function Home() {
               <Video className="h-4 w-4" />
             </div>
             <span className="text-lg font-semibold text-white">
-              Honest Hire
+              Preppo
             </span>
           </div>
           <p className="text-sm text-white/40">
-            © {new Date().getFullYear()} Honest Hire. All rights reserved.
+            © {new Date().getFullYear()} Preppo. All rights reserved.
           </p>
         </div>
       </footer>
