@@ -127,6 +127,11 @@ export class OpenAIRealtimeClient {
       const offer = await this.pc.createOffer()
       await this.pc.setLocalDescription(offer)
 
+      // Wait for local description to be set
+      if (this.pc.signalingState !== 'have-local-offer') {
+        throw new Error('Failed to set local description: unexpected signaling state')
+      }
+
       // Step 8: Send SDP offer to server
       const response = await fetch(this.config.sessionEndpoint, {
         method: 'POST',
@@ -152,6 +157,11 @@ export class OpenAIRealtimeClient {
       }
 
       // Step 9: Set remote description from server response
+      // Check signaling state before setting remote description
+      if (!this.pc || this.pc.signalingState !== 'have-local-offer') {
+        throw new Error(`Cannot set remote description: peer connection is in wrong state (${this.pc?.signalingState || 'null'})`)
+      }
+
       const answerSdp = await response.text()
       await this.pc.setRemoteDescription({
         type: 'answer',
@@ -180,7 +190,9 @@ export class OpenAIRealtimeClient {
 
     if (this.dataChannel) {
       try {
-        this.dataChannel.close()
+        if (this.dataChannel.readyState !== 'closed') {
+          this.dataChannel.close()
+        }
       } catch {
         // ignore
       }
@@ -189,7 +201,15 @@ export class OpenAIRealtimeClient {
 
     if (this.pc) {
       try {
-        this.pc.close()
+        // Remove all event listeners to prevent state changes during cleanup
+        this.pc.ontrack = null
+        this.pc.onconnectionstatechange = null
+        this.pc.oniceconnectionstatechange = null
+        
+        // Close the connection properly
+        if (this.pc.signalingState !== 'closed') {
+          this.pc.close()
+        }
       } catch {
         // ignore
       }
@@ -197,7 +217,9 @@ export class OpenAIRealtimeClient {
     this.pc = null
 
     if (this.mediaStream) {
-      this.mediaStream.getTracks().forEach((track) => track.stop())
+      this.mediaStream.getTracks().forEach((track) => {
+        track.stop()
+      })
     }
     this.mediaStream = null
 
