@@ -44,49 +44,53 @@ export function PracticeSessionList({ sessions }: PracticeSessionListProps) {
           whileHover={{ y: -2 }}
         >
           <div className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10 hover:shadow-xl hover:shadow-white/5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 space-y-3">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-2">
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">
+                  <h3 className="text-lg font-semibold text-white tracking-tight">
                     {session.job_title || 'Practice Interview'}
                   </h3>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-white/50">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-white/50 mt-1">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5" />
                       {new Date(session.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                       })}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
+                    <div className="h-1 w-1 rounded-full bg-white/20" />
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5" />
                       {session.duration}
                     </div>
                     {session.score !== null && (
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-white/80 font-medium">{session.score}%</span>
-                      </div>
+                      <>
+                        <div className="h-1 w-1 rounded-full bg-white/20" />
+                        <div className="flex items-center gap-1.5 text-white/80">
+                          <Star className="h-3.5 w-3.5 fill-white/20 text-white/40" />
+                          <span className="font-medium">{session.score}%</span>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <a
                     href={session.job_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-white/60 hover:text-white transition-colors flex items-center gap-2"
+                    className="text-xs font-medium text-white/40 hover:text-white transition-colors flex items-center gap-1.5"
                   >
                     View Job Posting
                     <ExternalLink className="h-3 w-3" />
                   </a>
                   <Badge 
                     variant={session.score !== null ? 'default' : 'secondary'}
-                    className="bg-white/10 text-white/80 border-white/20"
+                    className="bg-white/5 text-white/60 border-white/10 hover:bg-white/10 px-2 py-0.5 text-[10px] h-5"
                   >
-                    {session.score !== null ? 'Feedback Available' : 'No Feedback'}
+                    {session.score !== null ? 'Feedback Ready' : 'No Feedback'}
                   </Badge>
                 </div>
               </div>
@@ -95,10 +99,10 @@ export function PracticeSessionList({ sessions }: PracticeSessionListProps) {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/30"
+                  className="w-full sm:w-auto rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20 h-9 px-4 text-xs font-medium"
                 >
                   View Details
-                  <ArrowRight className="ml-2 h-3 w-3" />
+                  <ArrowRight className="ml-2 h-3 w-3 opacity-50" />
                 </Button>
               </Link>
             </div>

@@ -66,8 +66,10 @@ export function PracticeStats({
                 </div>
               </div>
               
-              <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-              <p className="text-sm text-white/50">{stat.description}</p>
+              <div className="space-y-1">
+                <div className="text-3xl font-bold text-white tracking-tight">{stat.value}</div>
+                <p className="text-sm text-white/40">{stat.description}</p>
+              </div>
             </div>
           </motion.div>
         )

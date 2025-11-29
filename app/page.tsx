@@ -88,9 +88,15 @@ export default function Home() {
             </motion.div>
             
             <motion.div variants={item} className="mt-12 flex items-center justify-center gap-8 lg:justify-start grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-               <div className="flex -space-x-2">
+               <div className="flex -space-x-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-8 w-8 rounded-full border-2 border-black bg-white/10" />
+                  <div key={i} className="h-10 w-10 rounded-full border-2 border-black bg-neutral-800 overflow-hidden">
+                    <img 
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}&backgroundColor=b6e3f4,c0aede,d1d4f9`}
+                      alt="User avatar"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 ))}
                </div>
                <div className="text-sm font-medium text-white/40">
