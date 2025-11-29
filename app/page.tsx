@@ -39,7 +39,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white selection:bg-purple-500/30">
+    <div className="relative min-h-screen overflow-hidden bg-black text-white selection:bg-white/20">
       <NebulaBackground />
       
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32">
@@ -51,7 +51,7 @@ export default function Home() {
             className="flex-1 text-center lg:text-left"
           >
             <motion.div variants={item} className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-md transition-colors hover:bg-white/10 hover:border-white/20">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
               <span className="font-medium">New: AI Voice Interviews</span>
               <div className="ml-1 h-4 w-[1px] bg-white/20" />
               <span className="flex items-center gap-1 text-white/50">
@@ -59,9 +59,9 @@ export default function Home() {
               </span>
             </motion.div>
             
-            <motion.h1 variants={item} className="text-5xl font-bold tracking-tight sm:text-7xl lg:text-8xl bg-gradient-to-br from-white via-white to-white/50 bg-clip-text text-transparent pb-4">
+            <motion.h1 variants={item} className="text-5xl font-bold tracking-tight sm:text-7xl lg:text-8xl bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent pb-4">
               Master your <br />
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">next interview</span>
+              <span className="text-white">next interview</span>
             </motion.h1>
             
             <motion.p variants={item} className="mt-6 text-lg text-white/60 leading-relaxed max-w-2xl mx-auto lg:mx-0 lg:text-xl">
@@ -71,7 +71,7 @@ export default function Home() {
             
             <motion.div variants={item} className="mt-10 flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
               <Link href="/auth/signup">
-                <Button className="h-12 w-full rounded-full bg-white px-8 text-base font-semibold text-black transition-all hover:bg-white/90 hover:scale-105 sm:w-auto shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                <Button className="h-12 w-full rounded-full bg-white px-8 text-base font-semibold text-black transition-all hover:bg-white/90 hover:scale-105 sm:w-auto shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                   Get Started Free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -88,7 +88,6 @@ export default function Home() {
             </motion.div>
             
             <motion.div variants={item} className="mt-12 flex items-center justify-center gap-8 lg:justify-start grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-               {/* Trust badges or stats could go here */}
                <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="h-8 w-8 rounded-full border-2 border-black bg-white/10" />
@@ -106,15 +105,15 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.5, type: "spring" }}
             className="flex-1 relative hidden lg:block"
           >
-            {/* Glassmorphic Interface Mockup */}
+            {/* Glassmorphic Interface Mockup - Monochrome Edition */}
             <div className="relative rounded-3xl border border-white/10 bg-black/40 p-2 shadow-2xl backdrop-blur-xl">
-              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-xl opacity-50" />
+              <div className="absolute -inset-1 rounded-3xl bg-white/5 blur-xl opacity-50" />
               
               <div className="relative rounded-2xl border border-white/5 bg-black/50 p-6 overflow-hidden">
                  {/* Header */}
                  <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-3">
-                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                     <div className="h-10 w-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
                         <Video className="h-5 w-5 text-white" />
                      </div>
                      <div>
@@ -123,20 +122,20 @@ export default function Home() {
                      </div>
                    </div>
                    <div className="flex gap-2">
-                     <span className="h-3 w-3 rounded-full bg-red-500/50" />
-                     <span className="h-3 w-3 rounded-full bg-yellow-500/50" />
-                     <span className="h-3 w-3 rounded-full bg-green-500/50" />
+                     <span className="h-3 w-3 rounded-full bg-white/10" />
+                     <span className="h-3 w-3 rounded-full bg-white/10" />
+                     <span className="h-3 w-3 rounded-full bg-white/10" />
                    </div>
                  </div>
 
                  {/* Chat Area */}
                  <div className="space-y-6">
                    <div className="flex gap-4">
-                     <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex-shrink-0 flex items-center justify-center border border-indigo-500/30">
-                       <Sparkles className="h-4 w-4 text-indigo-400" />
+                     <div className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0 flex items-center justify-center border border-white/10">
+                       <Sparkles className="h-4 w-4 text-white/70" />
                      </div>
                      <div className="flex-1 space-y-2">
-                       <p className="text-sm text-indigo-200/80">AI Interviewer</p>
+                       <p className="text-sm text-white/40">AI Interviewer</p>
                        <div className="rounded-2xl rounded-tl-none border border-white/5 bg-white/5 p-4 text-white/90 shadow-sm">
                          <p>Can you describe a time when you had to make a difficult product tradeoff decision? What was your framework?</p>
                        </div>
@@ -144,15 +143,15 @@ export default function Home() {
                    </div>
 
                    <div className="flex gap-4 flex-row-reverse">
-                     <div className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0 border border-white/10" />
+                     <div className="h-8 w-8 rounded-full bg-white/20 flex-shrink-0 border border-white/10" />
                      <div className="flex-1 space-y-2 text-right">
                        <p className="text-sm text-white/40">You</p>
-                       <div className="rounded-2xl rounded-tr-none bg-gradient-to-br from-indigo-600 to-purple-700 p-4 text-white shadow-lg shadow-indigo-500/10">
+                       <div className="rounded-2xl rounded-tr-none bg-white text-black p-4 shadow-lg">
                          <p>In my last role, I used the RICE scoring model to prioritize...</p>
                          <div className="mt-2 flex gap-1 justify-end">
-                            <span className="h-1.5 w-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="h-1.5 w-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="h-1.5 w-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '300ms' }} />
+                            <span className="h-1.5 w-1.5 rounded-full bg-black animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="h-1.5 w-1.5 rounded-full bg-black animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="h-1.5 w-1.5 rounded-full bg-black animate-bounce" style={{ animationDelay: '300ms' }} />
                          </div>
                        </div>
                      </div>
@@ -165,20 +164,20 @@ export default function Home() {
                       <p className="text-xs text-white/40 mb-1">Confidence Score</p>
                       <div className="flex items-end gap-2">
                         <span className="text-2xl font-bold text-white">92</span>
-                        <span className="text-xs text-emerald-400 mb-1">↑ 4%</span>
+                        <span className="text-xs text-white/50 mb-1">↑ 4%</span>
                       </div>
                       <div className="mt-2 h-1 w-full rounded-full bg-white/5 overflow-hidden">
-                        <div className="h-full w-[92%] bg-emerald-500 rounded-full" />
+                        <div className="h-full w-[92%] bg-white rounded-full" />
                       </div>
                     </div>
                     <div className="rounded-xl border border-white/5 bg-white/5 p-4 backdrop-blur-md">
                       <p className="text-xs text-white/40 mb-1">Clarity</p>
                       <div className="flex items-end gap-2">
                         <span className="text-2xl font-bold text-white">8.5</span>
-                        <span className="text-xs text-emerald-400 mb-1">/ 10</span>
+                        <span className="text-xs text-white/50 mb-1">/ 10</span>
                       </div>
                        <div className="mt-2 h-1 w-full rounded-full bg-white/5 overflow-hidden">
-                        <div className="h-full w-[85%] bg-blue-500 rounded-full" />
+                        <div className="h-full w-[85%] bg-white/70 rounded-full" />
                       </div>
                     </div>
                  </div>
@@ -192,7 +191,7 @@ export default function Home() {
               className="absolute -right-8 top-20 rounded-xl border border-white/10 bg-black/60 p-4 shadow-xl backdrop-blur-md"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20 text-green-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white">
                   <CheckCircle className="h-6 w-6" />
                 </div>
                 <div>
@@ -209,7 +208,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              Everything you need to <span className="text-indigo-400">succeed</span>
+              Everything you need to <span className="text-white/80">succeed</span>
             </h2>
             <p className="mt-4 text-lg text-white/60">
               Comprehensive tools to practice, improve, and ace your next interview
@@ -237,12 +236,12 @@ export default function Home() {
       </section>
       
        <section className="relative py-24">
-         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent pointer-events-none" />
+         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent pointer-events-none" />
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
              <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 items-center">
                <div>
                  <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                   Why practice with <span className="text-indigo-400">Honest Hire?</span>
+                   Why practice with <span className="text-white/80">Honest Hire?</span>
                  </h2>
                  <p className="mt-6 text-lg text-white/60">
                    Most candidates fail because they don't practice out loud. We provide a safe space to fail, learn, and improve before it counts.
@@ -262,7 +261,7 @@ export default function Home() {
                       transition={{ delay: index * 0.1 }}
                       className="flex items-center gap-3"
                     >
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-white">
                         <CheckCircle className="h-4 w-4" />
                       </div>
                       <span className="text-white/80">{feature}</span>
@@ -271,7 +270,7 @@ export default function Home() {
                  </div>
                  <div className="mt-10">
                    <Link href="/auth/signup">
-                    <Button size="lg" className="rounded-full px-8 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/25">
+                    <Button size="lg" className="rounded-full px-8 bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
                       Start Practicing Now
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -279,9 +278,9 @@ export default function Home() {
                  </div>
                </div>
                <div className="relative">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 blur-2xl rounded-full" />
+                  <div className="absolute -inset-4 bg-white/5 opacity-50 blur-2xl rounded-full" />
                   <div className="relative rounded-2xl border border-white/10 bg-black/80 p-2 shadow-2xl">
-                     <div className="aspect-video overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-black relative group cursor-pointer">
+                     <div className="aspect-video overflow-hidden rounded-xl bg-gradient-to-br from-neutral-900 to-black relative group cursor-pointer">
                         <div className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                            <div className="h-20 w-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
                              <Video className="h-8 w-8 text-white ml-1" />
@@ -289,7 +288,7 @@ export default function Home() {
                         </div>
                         <div className="absolute bottom-4 left-4 right-4">
                            <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                             <div className="h-full w-1/3 bg-indigo-500" />
+                             <div className="h-full w-1/3 bg-white" />
                            </div>
                            <div className="mt-2 flex justify-between text-xs text-white/60">
                              <span>04:20</span>
@@ -306,8 +305,8 @@ export default function Home() {
       <footer className="border-t border-white/5 bg-black py-12">
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-              <Video className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-black">
+              <Video className="h-4 w-4" />
             </div>
             <span className="text-lg font-semibold text-white">
               Honest Hire
@@ -334,9 +333,9 @@ function FeatureCard({
   return (
     <motion.div 
       whileHover={{ y: -5 }}
-      className="group relative rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:bg-white/10 hover:shadow-2xl hover:shadow-indigo-500/10"
+      className="group relative rounded-2xl border border-white/10 bg-white/5 p-8 transition-all hover:bg-white/10 hover:shadow-2xl hover:shadow-white/5"
     >
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-500/0 via-indigo-500/0 to-purple-500/0 opacity-0 transition-opacity duration-500 group-hover:from-indigo-500/10 group-hover:via-purple-500/5 group-hover:to-purple-500/0 group-hover:opacity-100 rounded-2xl" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white/5 via-white/0 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-2xl" />
       
       <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 ring-1 ring-white/10 transition-colors group-hover:bg-white/10 group-hover:ring-white/20">
         <Icon className="h-7 w-7 text-white/80 group-hover:text-white" />
@@ -346,4 +345,3 @@ function FeatureCard({
     </motion.div>
   )
 }
-
