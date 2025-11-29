@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Video, LayoutDashboard, PlayCircle, LogOut, DollarSign, FileText, ArrowRight } from 'lucide-react'
+import { Menu, X, Video, LayoutDashboard, PlayCircle, LogOut, DollarSign, FileText, ArrowRight, User, Settings, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
@@ -12,17 +12,33 @@ import { useRouter } from 'next/navigation'
 
 interface NavBarProps {
   user?: { email: string; id: string; fullName?: string | null } | null
+  isSubscribed?: boolean
 }
 
-export function NavBar({ user }: NavBarProps) {
+export function NavBar({ user, isSubscribed = false }: NavBarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
   const [scrolled, setScrolled] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isVisible, setIsVisible] = useState(true)
+  
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
   
   useEffect(() => {
     const handleScroll = () => {
@@ -47,7 +63,8 @@ export function NavBar({ user }: NavBarProps) {
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Practice', href: '/practice', icon: PlayCircle },
         { name: 'Resume', href: '/resume', icon: FileText },
-        { name: 'Pricing', href: '/pricing', icon: DollarSign },
+        // Hide Pricing if subscribed
+        ...(isSubscribed ? [] : [{ name: 'Pricing', href: '/pricing', icon: DollarSign }]),
       ]
     : [
         { name: 'Pricing', href: '/pricing', icon: DollarSign },
@@ -59,6 +76,8 @@ export function NavBar({ user }: NavBarProps) {
     router.refresh()
   }
 
+  const firstName = user?.fullName?.split(' ')[0] || user?.email?.split('@')[0] || 'User'
+
   return (
     <>
       <motion.nav
@@ -67,7 +86,7 @@ export function NavBar({ user }: NavBarProps) {
         transition={{ duration: 0.3, ease: 'easeInOut' }}
         className="fixed top-0 left-0 right-0 z-50 py-4 pointer-events-none"
       >
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pointer-events-auto">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pointer-events-auto">
           <div className={cn(
             "flex items-center justify-between rounded-full px-6 h-14 transition-all duration-300",
             // Always apply glass style to match the example
@@ -115,19 +134,53 @@ export function NavBar({ user }: NavBarProps) {
             
             <div className="hidden md:flex md:items-center md:gap-4">
               {user ? (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-white/60">
-                    {user.fullName || user.email}
-                  </span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={handleSignOut}
-                    className="text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                <div className="relative" ref={userMenuRef}>
+                  <button 
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 px-3 py-1.5 transition-colors border border-white/5 hover:border-white/10"
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign out
-                  </Button>
+                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">
+                      {firstName.charAt(0)}
+                    </div>
+                    <span className="text-sm font-medium text-white">
+                      {firstName}
+                    </span>
+                    <ChevronDown className={cn("h-3 w-3 text-white/50 transition-transform", userMenuOpen && "rotate-180")} />
+                  </button>
+
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/10 bg-black/90 p-2 shadow-xl backdrop-blur-xl"
+                      >
+                        <div className="px-2 py-1.5 mb-2 border-b border-white/10">
+                          <p className="text-xs font-medium text-white/40">Signed in as</p>
+                          <p className="text-sm font-medium text-white truncate">{user.email}</p>
+                        </div>
+                        
+                        <Link 
+                          href="/settings" 
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                        >
+                          <Settings className="h-4 w-4" />
+                          Settings
+                        </Link>
+                        
+                        <button
+                          onClick={handleSignOut}
+                          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign out
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -187,13 +240,32 @@ export function NavBar({ user }: NavBarProps) {
               
               <div className="mt-4 border-t border-white/10 pt-4">
                 {user ? (
-                  <button
-                    onClick={handleSignOut}
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Sign out
-                  </button>
+                  <>
+                    <div className="flex items-center gap-3 px-4 py-2 mb-2">
+                       <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
+                          {firstName.charAt(0)}
+                       </div>
+                       <div>
+                         <p className="text-sm font-medium text-white">{firstName}</p>
+                         <p className="text-xs text-white/40 truncate max-w-[150px]">{user.email}</p>
+                       </div>
+                    </div>
+                    <Link
+                      href="/settings"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"
+                    >
+                      <Settings className="h-5 w-5" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-400 hover:bg-red-500/10"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Sign out
+                    </button>
+                  </>
                 ) : (
                   <div className="flex flex-col gap-3">
                     <Link href="/auth/signin" onClick={() => setMobileMenuOpen(false)}>

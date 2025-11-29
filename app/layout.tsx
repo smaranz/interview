@@ -52,7 +52,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <NavBar user={user ? { email: user.email || '', id: user.id, fullName } : null} />
+        <NavBar 
+          user={user ? { email: user.email || '', id: user.id, fullName } : null} 
+          isSubscribed={false} // TODO: Connect to real subscription status
+        />
         {children}
       </body>
     </html>
