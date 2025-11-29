@@ -27,10 +27,23 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   let user = null
+  let fullName: string | null = null
+  
   try {
-  const supabase = await createClient()
+    const supabase = await createClient()
     const { data: { user: authUser } } = await supabase.auth.getUser()
-    user = authUser
+    
+    if (authUser) {
+      user = authUser
+      // Fetch profile to get full_name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', authUser.id)
+        .single()
+      
+      fullName = profile?.full_name || null
+    }
   } catch (error) {
     // Silently fail - user will be null and NavBar will handle it
     console.error('Error getting user in layout:', error)
@@ -39,7 +52,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <NavBar user={user ? { email: user.email || '', id: user.id } : null} />
+        <NavBar user={user ? { email: user.email || '', id: user.id, fullName } : null} />
         {children}
       </body>
     </html>

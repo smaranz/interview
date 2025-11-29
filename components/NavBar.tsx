@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 interface NavBarProps {
-  user?: { email: string; id: string } | null
+  user?: { email: string; id: string; fullName?: string | null } | null
 }
 
 export function NavBar({ user }: NavBarProps) {
@@ -117,7 +117,7 @@ export function NavBar({ user }: NavBarProps) {
               {user ? (
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-white/60">
-                    {user.email}
+                    {user.fullName || user.email}
                   </span>
                   <Button 
                     variant="ghost" 
