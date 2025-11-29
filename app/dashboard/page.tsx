@@ -19,27 +19,27 @@ export default async function DashboardPage() {
   ])
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="mt-1 text-muted-foreground">
+    <div className="min-h-screen bg-black text-white">
+      <div className="mx-auto max-w-7xl px-6 py-24 sm:px-8 lg:px-8">
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Dashboard</h1>
+          <p className="mt-3 text-lg text-white/60">
             View your practice session stats and history
           </p>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-12">
           {/* Stats Section */}
-            <section>
-            <h2 className="mb-4 text-lg font-semibold">Your Stats</h2>
+          <section>
+            <h2 className="mb-6 text-2xl font-semibold">Your Stats</h2>
             <PracticeStats {...stats} />
-            </section>
+          </section>
 
           {/* Practice Sessions List */}
-              <section>
-            <h2 className="mb-4 text-lg font-semibold">Practice Sessions</h2>
+          <section>
+            <h2 className="mb-6 text-2xl font-semibold">Practice Sessions</h2>
             <PracticeSessionList sessions={sessions} />
-              </section>
+          </section>
         </div>
       </div>
     </div>

@@ -580,21 +580,45 @@ Use this link to understand the role and ask relevant questions about the candid
 
   if (!isSessionActive) {
     return (
-      <div className="flex min-h-[80vh] flex-col items-center justify-center p-6 sm:p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex min-h-[80vh] flex-col items-center justify-center"
+      >
         <div className="w-full max-w-2xl space-y-8">
           <div className="text-center">
-            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-neutral-800">
-              <Briefcase className="h-12 w-12 text-neutral-200" />
-            </div>
-            <h2 className="mb-3 text-4xl font-bold text-white">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm"
+            >
+              <Briefcase className="h-12 w-12 text-white" />
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-3 text-4xl font-bold text-white"
+            >
               Setup Interview Context
-            </h2>
-            <p className="text-lg text-neutral-400">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg text-white/60"
+            >
               Paste the job application link to tailor the AI interview.
-            </p>
-            <div className="mt-6 flex items-center gap-3 rounded-lg bg-neutral-800 px-6 py-4" data-testid="credits-badge">
-              <Star className="h-6 w-6 text-yellow-400 fill-current flex-shrink-0" />
-              <span className="text-white font-semibold text-lg" data-testid="credits-text">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-4 backdrop-blur-md" data-testid="credits-badge"
+            >
+              <Star className="h-5 w-5 text-white fill-current flex-shrink-0" />
+              <span className="text-white font-semibold text-base" data-testid="credits-text">
                 {isLoadingCredits 
                   ? 'Loading...' 
                   : credits !== null 
@@ -602,15 +626,11 @@ Use this link to understand the role and ask relevant questions about the candid
                     : 'Loading...'}
               </span>
               {credits !== null && !isLoadingCredits && (
-                <span className="text-neutral-400 text-base" data-testid="credits-info">
+                <span className="text-white/50 text-sm" data-testid="credits-info">
                   ({(() => {
-                    // Hardcode costs to ensure they're always available
-                    const cost25 = 30 // CREDIT_COSTS?.['25min'] ?? 30
-                    const cost10 = 15 // CREDIT_COSTS?.['10min'] ?? 15
-                    
-                    // Ensure credits is a number
+                    const cost25 = 30
+                    const cost10 = 15
                     const creditsNum = typeof credits === 'number' ? credits : 0
-                    
                     if (creditsNum >= cost25) {
                       return '25 min'
                     }
@@ -627,42 +647,44 @@ Use this link to understand the role and ask relevant questions about the candid
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log('Refresh button clicked, current credits state:', credits, 'isLoading:', isLoadingCredits)
                   fetchCredits()
                 }}
                 disabled={isLoadingCredits}
-                className="ml-auto text-sm h-8 px-3 disabled:opacity-50"
+                className="ml-auto text-sm h-8 px-3 disabled:opacity-50 text-white/60 hover:text-white hover:bg-white/10 rounded-full"
                 title="Refresh credits"
               >
                 {isLoadingCredits ? <Loader2 className="h-4 w-4 animate-spin" /> : '↻'}
               </Button>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="space-y-6 rounded-lg border border-neutral-800 bg-neutral-900 p-8 sm:p-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-8 sm:p-10 backdrop-blur-sm"
+          >
             <div className="space-y-3">
-              <label className="text-base font-semibold text-neutral-200">Job Application Link</label>
+              <label className="text-sm font-semibold text-white/80">Job Application Link</label>
               <Input 
                 placeholder="https://linkedin.com/jobs/view/... or https://company.com/careers/..."
                 value={jobUrl}
                 onChange={(e) => setJobUrl(e.target.value)}
-                className="bg-neutral-800 border-neutral-700 text-white h-12 text-base"
+                className="bg-black/40 border-white/10 text-white h-12 text-base focus:border-white/20"
               />
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-white/50">
                 Paste the link to the job posting (LinkedIn, company website, etc.)
               </p>
             </div>
             
             <div className="space-y-4">
-              <label className="text-base font-semibold text-neutral-200">Interview Duration</label>
+              <label className="text-sm font-semibold text-white/80">Interview Duration</label>
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => {
                     const creditsNum = typeof credits === 'number' ? credits : 0
-                    console.log('10min button clicked, credits:', creditsNum)
                     if (creditsNum >= 15) {
-                      console.log('Setting duration to 10min')
                       setSelectedDuration('10min')
                     } else {
                       alert(`You need at least 15 credits for a 10-minute interview. You currently have ${creditsNum} credits.`)
@@ -670,23 +692,21 @@ Use this link to understand the role and ask relevant questions about the candid
                   }}
                   disabled={credits === null || (typeof credits === 'number' && credits < 15)}
                   className={cn(
-                    "rounded-lg border-2 p-6 text-left transition-all cursor-pointer",
+                    "rounded-xl border-2 p-6 text-left transition-all cursor-pointer",
                     selectedDuration === '10min'
-                      ? "border-white bg-white text-black"
-                      : "border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-neutral-600",
+                      ? "border-white bg-white text-black shadow-lg"
+                      : "border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10",
                     (credits === null || (typeof credits === 'number' && credits < 15)) && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <div className="font-bold text-lg">10 Minutes</div>
-                  <div className="text-sm mt-2">15 credits</div>
+                  <div className="text-sm mt-2 text-white/60">15 credits</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     const creditsNum = typeof credits === 'number' ? credits : 0
-                    console.log('25min button clicked, credits:', creditsNum)
                     if (creditsNum >= 30) {
-                      console.log('Setting duration to 25min')
                       setSelectedDuration('25min')
                     } else {
                       alert(`You need at least 30 credits for a 25-minute interview. You currently have ${creditsNum} credits.`)
@@ -694,19 +714,19 @@ Use this link to understand the role and ask relevant questions about the candid
                   }}
                   disabled={credits === null || (typeof credits === 'number' && credits < 30)}
                   className={cn(
-                    "rounded-lg border-2 p-6 text-left transition-all cursor-pointer",
+                    "rounded-xl border-2 p-6 text-left transition-all cursor-pointer",
                     selectedDuration === '25min'
-                      ? "border-white bg-white text-black"
-                      : "border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-neutral-600",
+                      ? "border-white bg-white text-black shadow-lg"
+                      : "border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10",
                     (credits === null || (typeof credits === 'number' && credits < 30)) && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <div className="font-bold text-lg">25 Minutes</div>
-                  <div className="text-sm mt-2">30 credits</div>
+                  <div className="text-sm mt-2 text-white/60">30 credits</div>
                 </button>
               </div>
               {selectedDuration && (
-                <p className="text-sm text-neutral-400">
+                <p className="text-sm text-white/50">
                   Selected: {selectedDuration === '10min' ? '10 minutes' : '25 minutes'} interview ({CREDIT_COSTS[selectedDuration]} credits)
                 </p>
               )}
@@ -717,13 +737,6 @@ Use this link to understand the role and ask relevant questions about the candid
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                console.log('Start button clicked:', { 
-                  jobUrl: jobUrl.trim(), 
-                  selectedDuration,
-                  jobUrlLength: jobUrl.trim().length,
-                  hasJobUrl: !!jobUrl.trim(),
-                  hasDuration: !!selectedDuration
-                })
                 if (!jobUrl.trim()) {
                   alert('Please enter a job application link.')
                   return
@@ -735,19 +748,19 @@ Use this link to understand the role and ask relevant questions about the candid
                 startSession()
               }}
               disabled={!jobUrl.trim() || !selectedDuration}
-              className="w-full h-14 text-lg font-semibold bg-white text-black hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-14 text-lg font-semibold rounded-full bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             >
               Start Live Session
             </Button>
             {(!jobUrl.trim() || !selectedDuration) && (
-              <p className="text-sm text-neutral-500 mt-3">
+              <p className="text-sm text-white/50 mt-3">
                 {!jobUrl.trim() && '⚠️ Please enter a job application link. '}
                 {!selectedDuration && '⚠️ Please select an interview duration.'}
               </p>
             )}
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     )
   }
 

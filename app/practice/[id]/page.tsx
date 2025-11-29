@@ -31,20 +31,20 @@ export default async function PracticeSessionPage({ params }: PageProps) {
   const feedback = session.feedback as InterviewFeedback | null
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black text-white">
+      <div className="mx-auto max-w-4xl px-6 py-24 sm:px-8 lg:px-8">
         <Link href="/dashboard">
-          <Button variant="ghost" className="mb-6">
+          <Button variant="ghost" className="mb-6 text-white/70 hover:text-white hover:bg-white/10 rounded-full">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
         </Link>
 
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-white sm:text-4xl">
             {session.job_title || 'Practice Interview'}
           </h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-white/50">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
               {new Date(session.created_at).toLocaleDateString('en-US', {
