@@ -23,6 +23,7 @@ export class OpenAIRealtimeClient {
   private currentInstructions = ''
   private activeResponse = ''
   private sessionReady = false
+  private hasAlexSpokenFirst = false // Track if Alex has spoken first
 
   public onStatusChange?: (status: ConnectionStatus) => void
   public onTextData?: (text: string) => void
@@ -111,7 +112,11 @@ export class OpenAIRealtimeClient {
       this.setupAudioOutput()
 
       // Step 4: Add local audio track to peer connection
+      // Mute the microphone initially so user can't speak before Alex
       this.mediaStream.getTracks().forEach((track) => {
+        if (track.kind === 'audio') {
+          track.enabled = false // Mute microphone until Alex speaks first
+        }
         if (this.pc) {
           this.pc.addTrack(track, this.mediaStream as MediaStream)
         }
@@ -187,6 +192,7 @@ export class OpenAIRealtimeClient {
 
     this.activeResponse = ''
     this.sessionReady = false
+    this.hasAlexSpokenFirst = false // Reset flag on disconnect
 
     if (this.dataChannel) {
       try {
@@ -326,7 +332,8 @@ export class OpenAIRealtimeClient {
       console.log('Data channel opened, sending session update')
       this.sessionReady = false
       
-      // Update session with instructions and voice activity detection
+      // Update session with instructions
+      // IMPORTANT: Disable voice activity detection initially so user can't speak before Alex
       this.sendEvent({
         type: 'session.update',
         session: {
@@ -334,7 +341,7 @@ export class OpenAIRealtimeClient {
           instructions: this.currentInstructions,
           audio: {
             voice_activity_detection: {
-              enabled: true,
+              enabled: false, // Disabled until Alex speaks first
             },
           },
         },
@@ -367,11 +374,19 @@ export class OpenAIRealtimeClient {
     this.sendEvent({
       type: 'response.create',
       response: {
-        instructions: `You are Alex, a job interviewer. The interview is starting NOW. 
+        instructions: `YOU (THE AI) are Alex, a job interviewer. The interview is starting NOW. 
+
+CRITICAL - YOU MUST SPEAK FIRST:
+- YOU are Alex, the interviewer
+- The USER speaking to you is the CANDIDATE (not Alex)
+- Do NOT confuse roles - you are the interviewer, they are the candidate
+- The candidate's microphone is MUTED until you speak first
+- You MUST start speaking IMMEDIATELY - do not wait for the user
+- This is your first and only chance to introduce yourself as Alex
 
 Your FIRST words MUST be: "Hi, I'm Alex. I'll be conducting your interview today. Let's start by having you introduce yourself and tell me a bit about your background."
 
-DO NOT say "How can I help you" or act like an assistant. You are an INTERVIEWER. Start the interview by introducing yourself as Alex.`,
+DO NOT say "How can I help you" or act like an assistant. You are an INTERVIEWER. Start the interview by introducing yourself as Alex RIGHT NOW.`,
         modalities: ['audio'], // Explicitly request audio output
       },
     })
@@ -392,6 +407,33 @@ DO NOT say "How can I help you" or act like an assistant. You are an INTERVIEWER
       if (this.activeResponse.trim().length > 0) {
         this.onTextData?.(this.activeResponse.trim())
       }
+      
+      // After Alex finishes speaking for the first time, enable user input
+      if (!this.hasAlexSpokenFirst) {
+        this.hasAlexSpokenFirst = true
+        console.log('Alex has spoken first, now enabling user input')
+        
+        // Enable voice activity detection
+        this.sendEvent({
+          type: 'session.update',
+          session: {
+            type: 'realtime',
+            audio: {
+              voice_activity_detection: {
+                enabled: true,
+              },
+            },
+          },
+        })
+        
+        // Unmute the microphone
+        if (this.mediaStream) {
+          this.mediaStream.getAudioTracks().forEach((track) => {
+            track.enabled = true
+          })
+        }
+      }
+      
       this.activeResponse = ''
     }
 
