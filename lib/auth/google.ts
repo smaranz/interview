@@ -1,90 +1,56 @@
-'use client'
-
-import { signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth'
-import { getAuthInstance, getGoogleProviderInstance } from '@/lib/firebase'
+import { createClient } from '@/lib/supabase/client'
 
 /**
- * Firebase Google SSO Authentication
+ * Google SSO Authentication Helper
  * 
- * Uses Firebase Auth for Google sign-in, which then connects to Supabase
- * as a third-party auth provider.
+ * Handles Google OAuth sign-in and sign-up flows
  */
 
-export interface GoogleAuthResult {
-  user: {
-    uid: string
-    email: string | null
-    displayName: string | null
-    photoURL: string | null
-  }
-  token: string | null
+export interface GoogleAuthOptions {
+  redirectTo?: string
+  scopes?: string[]
 }
 
 /**
- * Sign in with Google using Firebase Auth
+ * Sign in with Google OAuth
  */
-export async function signInWithGoogle(): Promise<GoogleAuthResult> {
-  try {
-    const auth = getAuthInstance()
-    const googleProvider = getGoogleProviderInstance()
-    if (!auth || !googleProvider) {
-      throw new Error('Firebase is not initialized. Please check your environment variables.')
-    }
-    const result = await signInWithPopup(auth, googleProvider)
-    const user = result.user
-    
-    // Get the Firebase ID token - this will be used by Supabase
-    const token = await user.getIdToken(true) // Force refresh to get latest claims
-    
-    return {
-      user: {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-      },
-      token,
-    }
-  } catch (error) {
-    console.error('Google sign-in error:', error)
-    throw error
-  }
-}
-
-/**
- * Sign out from Firebase
- */
-export async function signOutFromGoogle(): Promise<void> {
-  try {
-    const auth = getAuthInstance()
-    if (!auth) return
-    await firebaseSignOut(auth)
-  } catch (error) {
-    console.error('Sign out error:', error)
-    throw error
-  }
-}
-
-/**
- * Get current Firebase user's ID token
- */
-export async function getFirebaseIdToken(): Promise<string | null> {
-  const auth = getAuthInstance()
-  const user = auth?.currentUser
-  if (!user) return null
+export async function signInWithGoogle(options: GoogleAuthOptions = {}) {
+  const supabase = createClient()
+  const redirectTo = options.redirectTo || `${window.location.origin}/auth/callback`
   
-  try {
-    return await user.getIdToken(false)
-  } catch (error) {
-    console.error('Error getting ID token:', error)
-    return null
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+        ...(options.scopes && { scope: options.scopes.join(' ') }),
+      },
+    },
+  })
+
+  if (error) {
+    throw new Error(`Google sign-in failed: ${error.message}`)
   }
+
+  return data
 }
 
 /**
- * Check if user is signed in via Firebase
+ * Sign up with Google OAuth (same as sign-in for OAuth providers)
  */
-export function isFirebaseUserSignedIn(): boolean {
-  const auth = getAuthInstance()
-  return !!auth?.currentUser
+export async function signUpWithGoogle(options: GoogleAuthOptions = {}) {
+  return signInWithGoogle(options)
 }
+
+/**
+ * Check if Google OAuth is configured
+ */
+export function isGoogleOAuthConfigured(): boolean {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
+}
+

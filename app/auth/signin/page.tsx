@@ -1,65 +1,44 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Video, Chrome } from 'lucide-react'
+import { Video, Mail, Lock, Chrome } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
 import { signInWithGoogle } from '@/lib/auth/google'
-import { onAuthStateChanged } from 'firebase/auth'
-import { getAuthInstance } from '@/lib/firebase'
 
 export default function SignInPage() {
   const router = useRouter()
   const supabase = createClient()
+  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  })
 
-  // Listen for auth state changes
-  useEffect(() => {
-    const auth = getAuthInstance()
-    if (!auth) {
-      setError('Firebase is not initialized. Please check your environment variables.')
-      return
-    }
-    
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // User is signed in via Firebase, ensure profile exists in Supabase
-        await ensureProfileExists(firebaseUser)
-        router.push('/dashboard')
-        router.refresh()
-      }
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password,
     })
 
-    return () => unsubscribe()
-  }, [router])
-
-  // Ensure the Firebase user has a profile in Supabase
-  const ensureProfileExists = async (firebaseUser: { uid: string; email: string | null; displayName: string | null; photoURL: string | null }) => {
-    try {
-      // Check if profile exists
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', firebaseUser.uid)
-        .single()
-
-      if (!existingProfile) {
-        // Create profile for new user
-        await supabase.from('profiles').insert({
-          id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          full_name: firebaseUser.displayName || '',
-          avatar_url: firebaseUser.photoURL || '',
-          credits: 3, // Starting credits for new users
-        })
-      }
-    } catch (error) {
-      console.error('Error ensuring profile exists:', error)
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return
     }
+
+    router.push('/dashboard')
+    router.refresh()
   }
 
   const handleGoogleSignIn = async () => {
@@ -67,16 +46,10 @@ export default function SignInPage() {
     setError(null)
     
     try {
-      const result = await signInWithGoogle()
-      
-      // Ensure profile exists for this user
-      await ensureProfileExists(result.user)
-      
-      // Navigate to dashboard
-      router.push('/dashboard')
-      router.refresh()
+      await signInWithGoogle({
+        redirectTo: `${window.location.origin}/auth/callback`,
+      })
     } catch (err) {
-      console.error('Google sign-in error:', err)
       setError(err instanceof Error ? err.message : 'Failed to sign in with Google')
       setGoogleLoading(false)
     }
@@ -100,27 +73,64 @@ export default function SignInPage() {
         <Card>
           <CardHeader className="sr-only">
             <CardTitle>Sign In</CardTitle>
-            <CardDescription>Sign in with your Google account</CardDescription>
+            <CardDescription>Enter your credentials to sign in</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            {error && (
-              <p className="mb-4 text-sm text-destructive text-center">{error}</p>
-            )}
+            <form onSubmit={handleEmailSignIn} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="Email address"
+                  className="pl-10"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  className="pl-10"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
+
+              {error && (
+                <p className="text-sm text-destructive">{error}</p>
+              )}
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </form>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
 
             <Button
               type="button"
               variant="outline"
               className="w-full"
               onClick={handleGoogleSignIn}
-              disabled={googleLoading}
+              disabled={loading || googleLoading}
             >
               <Chrome className="mr-2 h-4 w-4" />
               {googleLoading ? 'Connecting...' : 'Continue with Google'}
             </Button>
-
-            <p className="mt-4 text-xs text-center text-muted-foreground">
-              By continuing, you agree to our Terms of Service and Privacy Policy
-            </p>
           </CardContent>
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">

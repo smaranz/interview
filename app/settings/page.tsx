@@ -1,63 +1,22 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/AuthProvider'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CreditCard, User } from 'lucide-react'
 import { UpgradeButton, BuyCreditsButton, CancelSubscriptionButton } from './SettingsActions'
 
-interface Profile {
-  full_name: string | null
-  credits: number
-}
-
-export default function SettingsPage() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [dataLoading, setDataLoading] = useState(true)
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/signin')
-      return
-    }
-
-    if (user) {
-      fetchProfile()
-    }
-  }, [user, loading, router])
-
-  const fetchProfile = async () => {
-    try {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, credits')
-        .eq('id', user!.uid)
-        .single()
-      
-      setProfile(data)
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-    } finally {
-      setDataLoading(false)
-    }
-  }
-
-  if (loading || dataLoading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-white/60">Loading...</div>
-      </div>
-    )
-  }
+export default async function SettingsPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return null // Will redirect
+    redirect('/auth/signin')
   }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
 
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-12">
@@ -84,7 +43,7 @@ export default function SettingsPage() {
             <div className="grid gap-1">
               <label className="text-sm font-medium text-white/60">Full Name</label>
               <div className="p-3 rounded-md bg-white/5 border border-white/10 text-white">
-                {profile?.full_name || user.displayName || 'Not set'}
+                {profile?.full_name || 'Not set'}
               </div>
             </div>
           </CardContent>
@@ -127,3 +86,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+

@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Video, LayoutDashboard, PlayCircle, LogOut, DollarSign, FileText, ArrowRight, Settings, ChevronDown } from 'lucide-react'
+import { Menu, X, Video, LayoutDashboard, PlayCircle, LogOut, DollarSign, FileText, ArrowRight, User, Settings, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { signOutFromGoogle } from '@/lib/auth/google'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 interface NavBarProps {
@@ -21,6 +21,7 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const supabase = createClient()
 
   const [scrolled, setScrolled] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -71,7 +72,7 @@ export function NavBar({ user, isSubscribed = false }: NavBarProps) {
 
   const handleSignOut = async () => {
     setUserMenuOpen(false)
-    await signOutFromGoogle()
+    await supabase.auth.signOut()
     router.push('/')
     router.refresh()
   }
