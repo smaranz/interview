@@ -1,8 +1,6 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
 
 interface AuthUser {
   uid: string
@@ -34,21 +32,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName,
-          photoURL: firebaseUser.photoURL,
-        })
-      } else {
-        setUser(null)
+    // Only run on client side
+    if (typeof window === 'undefined') {
+      setLoading(false)
+      return
+    }
+
+    // Dynamically import Firebase to avoid build-time errors
+    Promise.all([
+      import('firebase/auth'),
+      import('@/lib/firebase')
+    ]).then(([{ onAuthStateChanged }, { auth }]) => {
+      if (!auth) {
+        setLoading(false)
+        return
       }
+
+      const unsubscribe = onAuthStateChanged(auth, (firebaseUser: any) => {
+        if (firebaseUser) {
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+          })
+        } else {
+          setUser(null)
+        }
+        setLoading(false)
+      })
+
+      return () => unsubscribe()
+    }).catch((error) => {
+      console.error('Firebase auth setup error:', error)
       setLoading(false)
     })
-
-    return () => unsubscribe()
   }, [])
 
   return (
