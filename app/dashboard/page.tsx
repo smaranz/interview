@@ -6,20 +6,7 @@ import { useAuth } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { PracticeStats } from '@/components/PracticeStats'
 import { PracticeSessionList } from '@/components/PracticeSessionList'
-
-interface PracticeSession {
-  id: string
-  job_url: string
-  job_title: string | null
-  duration: string
-  score: number | null
-  created_at: string
-  feedback: {
-    strengths?: string[]
-    improvements?: string[]
-    overallFeedback?: string
-  } | null
-}
+import type { PracticeSession } from '@/lib/practice-sessions'
 
 interface Stats {
   totalSessions: number
@@ -65,7 +52,7 @@ export default function DashboardPage() {
       if (sessionsError) {
         console.error('Error fetching sessions:', sessionsError)
       } else {
-        setSessions(sessionsData || [])
+        setSessions((sessionsData || []) as PracticeSession[])
         
         // Calculate stats
         const completedSessions = sessionsData?.filter(s => s.score !== null) || []
