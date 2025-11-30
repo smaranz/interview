@@ -1,0 +1,70 @@
+Copy-Paste These Environment Variables into Vercel Dashboard
+============================================================
+
+Go to: https://vercel.com/smaranzs-projects/interview/settings/environment-variables
+
+For EACH variable below:
+1. Click "Add New"
+2. Copy the KEY and paste it
+3. Copy the VALUE and paste it
+4. Select ALL THREE environments: ✅ Production ✅ Preview ✅ Development
+5. Click "Save"
+
+---
+
+Variable 1:
+KEY:
+NEXT_PUBLIC_FIREBASE_API_KEY
+
+VALUE:
+AIzaSyDv8IRUeYrjvirAkCWN1FtC9oBXiqYE2i4
+
+---
+
+Variable 2:
+KEY:
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+
+VALUE:
+preppo-a3fad.firebaseapp.com
+
+---
+
+Variable 3:
+KEY:
+NEXT_PUBLIC_FIREBASE_PROJECT_ID
+
+VALUE:
+preppo-a3fad
+
+---
+
+Variable 4:
+KEY:
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+
+VALUE:
+preppo-a3fad.firebasestorage.app
+
+---
+
+Variable 5:
+KEY:
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+
+VALUE:
+756196373432
+
+---
+
+Variable 6:
+KEY:
+NEXT_PUBLIC_FIREBASE_APP_ID
+
+VALUE:
+1:756196373432:web:05b65ff9a8489cd44a154d
+
+---
+
+After adding all 6 variables, go to Deployments and click "Redeploy" on the latest deployment.
+

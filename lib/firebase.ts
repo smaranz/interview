@@ -16,7 +16,10 @@ function initFirebase() {
     const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
 
+    console.log('Firebase init - API Key present:', !!apiKey, 'Project ID:', projectId)
+
     if (!apiKey || !projectId) {
+      console.warn('Firebase config missing - API Key or Project ID not found')
       return false
     }
 
@@ -33,6 +36,7 @@ function initFirebase() {
     authInstance = getAuth(app)
     googleProviderInstance = new GoogleAuthProvider()
     googleProviderInstance.setCustomParameters({ prompt: 'select_account' })
+    console.log('Firebase initialized successfully')
     return true
   } catch (error) {
     if (typeof window !== 'undefined') {

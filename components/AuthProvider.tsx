@@ -38,18 +38,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
+    let timeoutId: NodeJS.Timeout | null = null
+    let isMounted = true
+
+    // Set a timeout to ensure loading always resolves
+    timeoutId = setTimeout(() => {
+      if (isMounted) {
+        console.warn('Firebase auth initialization timeout - proceeding without auth')
+        setLoading(false)
+      }
+    }, 5000) // 5 second timeout
+
     // Dynamically import Firebase to avoid build-time errors
     Promise.all([
       import('firebase/auth'),
       import('@/lib/firebase')
     ]).then(([{ onAuthStateChanged }, { getAuthInstance }]) => {
+      if (!isMounted) return
+
       const auth = getAuthInstance()
       if (!auth) {
+        console.warn('Firebase auth instance not available')
+        if (timeoutId) clearTimeout(timeoutId)
         setLoading(false)
         return
       }
 
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser: any) => {
+        if (!isMounted) return
+
         if (firebaseUser) {
           setUser({
             uid: firebaseUser.uid,
@@ -60,14 +77,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } else {
           setUser(null)
         }
+        if (timeoutId) clearTimeout(timeoutId)
         setLoading(false)
       })
 
-      return () => unsubscribe()
+      return () => {
+        if (unsubscribe) unsubscribe()
+      }
     }).catch((error) => {
       console.error('Firebase auth setup error:', error)
-      setLoading(false)
+      if (timeoutId) clearTimeout(timeoutId)
+      if (isMounted) {
+        setLoading(false)
+      }
     })
+
+    return () => {
+      isMounted = false
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [])
 
   return (
