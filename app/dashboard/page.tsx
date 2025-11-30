@@ -23,9 +23,9 @@ interface PracticeSession {
 
 interface Stats {
   totalSessions: number
-  avgScore: number
-  completedSessions: number
-  totalPracticeMinutes: number
+  averageScore: number | null
+  totalPracticeTime: number
+  sessionsByDuration: { '10min': number; '25min': number }
 }
 
 export default function DashboardPage() {
@@ -34,9 +34,9 @@ export default function DashboardPage() {
   const [sessions, setSessions] = useState<PracticeSession[]>([])
   const [stats, setStats] = useState<Stats>({
     totalSessions: 0,
-    avgScore: 0,
-    completedSessions: 0,
-    totalPracticeMinutes: 0,
+    averageScore: null,
+    totalPracticeTime: 0,
+    sessionsByDuration: { '10min': 0, '25min': 0 },
   })
   const [dataLoading, setDataLoading] = useState(true)
 
@@ -74,15 +74,24 @@ export default function DashboardPage() {
           return acc + mins
         }, 0) || 0
         
-        const avgScore = completedSessions.length > 0
-          ? completedSessions.reduce((acc, s) => acc + (s.score || 0), 0) / completedSessions.length
-          : 0
+        const averageScore = completedSessions.length > 0
+          ? Math.round(completedSessions.reduce((acc, s) => acc + (s.score || 0), 0) / completedSessions.length)
+          : null
+        
+        const sessionsByDuration = sessionsData?.reduce((acc, s) => {
+          if (s.duration === '10min') {
+            acc['10min'] = (acc['10min'] || 0) + 1
+          } else if (s.duration === '25min') {
+            acc['25min'] = (acc['25min'] || 0) + 1
+          }
+          return acc
+        }, { '10min': 0, '25min': 0 } as { '10min': number; '25min': number }) || { '10min': 0, '25min': 0 }
         
         setStats({
           totalSessions: sessionsData?.length || 0,
-          avgScore: Math.round(avgScore),
-          completedSessions: completedSessions.length,
-          totalPracticeMinutes: totalMinutes,
+          averageScore,
+          totalPracticeTime: totalMinutes,
+          sessionsByDuration,
         })
       }
     } catch (error) {
