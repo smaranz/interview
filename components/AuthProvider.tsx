@@ -42,7 +42,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     Promise.all([
       import('firebase/auth'),
       import('@/lib/firebase')
-    ]).then(([{ onAuthStateChanged }, { auth }]) => {
+    ]).then(([{ onAuthStateChanged }, { getAuthInstance }]) => {
+      const auth = getAuthInstance()
       if (!auth) {
         setLoading(false)
         return

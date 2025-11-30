@@ -1,7 +1,7 @@
 'use client'
 
 import { signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth'
-import { auth, googleProvider } from '@/lib/firebase'
+import { getAuthInstance, getGoogleProviderInstance } from '@/lib/firebase'
 
 /**
  * Firebase Google SSO Authentication
@@ -25,6 +25,11 @@ export interface GoogleAuthResult {
  */
 export async function signInWithGoogle(): Promise<GoogleAuthResult> {
   try {
+    const auth = getAuthInstance()
+    const googleProvider = getGoogleProviderInstance()
+    if (!auth || !googleProvider) {
+      throw new Error('Firebase is not initialized. Please check your environment variables.')
+    }
     const result = await signInWithPopup(auth, googleProvider)
     const user = result.user
     
@@ -51,6 +56,8 @@ export async function signInWithGoogle(): Promise<GoogleAuthResult> {
  */
 export async function signOutFromGoogle(): Promise<void> {
   try {
+    const auth = getAuthInstance()
+    if (!auth) return
     await firebaseSignOut(auth)
   } catch (error) {
     console.error('Sign out error:', error)
@@ -62,7 +69,8 @@ export async function signOutFromGoogle(): Promise<void> {
  * Get current Firebase user's ID token
  */
 export async function getFirebaseIdToken(): Promise<string | null> {
-  const user = auth.currentUser
+  const auth = getAuthInstance()
+  const user = auth?.currentUser
   if (!user) return null
   
   try {
@@ -77,5 +85,6 @@ export async function getFirebaseIdToken(): Promise<string | null> {
  * Check if user is signed in via Firebase
  */
 export function isFirebaseUserSignedIn(): boolean {
-  return !!auth.currentUser
+  const auth = getAuthInstance()
+  return !!auth?.currentUser
 }

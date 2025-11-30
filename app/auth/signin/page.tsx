@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { createClient } from '@/lib/supabase/client'
 import { signInWithGoogle } from '@/lib/auth/google'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
+import { getAuthInstance } from '@/lib/firebase'
 
 export default function SignInPage() {
   const router = useRouter()
@@ -19,6 +19,12 @@ export default function SignInPage() {
 
   // Listen for auth state changes
   useEffect(() => {
+    const auth = getAuthInstance()
+    if (!auth) {
+      setError('Firebase is not initialized. Please check your environment variables.')
+      return
+    }
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // User is signed in via Firebase, ensure profile exists in Supabase

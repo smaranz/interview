@@ -1,7 +1,7 @@
 'use client'
 
 import { createBrowserClient } from '@supabase/ssr'
-import { auth } from '@/lib/firebase'
+import { getAuthInstance } from '@/lib/firebase'
 
 /**
  * Creates a Supabase client for use in browser/client components.
@@ -17,7 +17,8 @@ export function createClient() {
     {
       accessToken: async () => {
         // Get the Firebase ID token for the current user
-        const user = auth.currentUser
+        const auth = getAuthInstance()
+        const user = auth?.currentUser
         if (!user) return null
         
         try {
