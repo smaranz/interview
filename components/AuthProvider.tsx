@@ -64,7 +64,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
+      console.log('Setting up onAuthStateChanged listener')
+      
+      // Clear the timeout since we have Firebase now
+      if (timeoutId) clearTimeout(timeoutId)
+
+      // Check current user immediately and set loading to false
+      const currentUser = auth.currentUser
+      if (currentUser) {
+        console.log('User already signed in:', currentUser.email)
+        setUser({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL,
+        })
+        setLoading(false)
+      } else {
+        console.log('No user currently signed in')
+        // Still set loading to false - user can sign in later
+        setLoading(false)
+      }
+
+      // Set up listener for future auth changes
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser: any) => {
+        console.log('Auth state changed:', firebaseUser ? 'signed in' : 'signed out')
+        
         if (!isMounted) return
 
         if (firebaseUser) {
@@ -77,8 +102,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } else {
           setUser(null)
         }
-        if (timeoutId) clearTimeout(timeoutId)
-        setLoading(false)
+        // Don't set loading here - already set above
+      }, (error) => {
+        console.error('Auth state changed error:', error)
+        if (isMounted && loading) {
+          setLoading(false)
+        }
       })
 
       return () => {
