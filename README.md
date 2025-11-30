@@ -1,4 +1,4 @@
-# Honest Hire
+# Preppo
 
 AI-powered interview practice platform for job seekers. Practice with AI, get personalized feedback, and improve your interview skills.
 
@@ -16,7 +16,7 @@ AI-powered interview practice platform for job seekers. Practice with AI, get pe
 - **Language**: TypeScript
 - **Styling**: TailwindCSS
 - **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth (Email + Google OAuth)
+- **Authentication**: Firebase Auth (Google SSO) → Supabase Third-Party Auth
 - **Deployment**: Vercel
 
 ## Getting Started
@@ -26,37 +26,60 @@ AI-powered interview practice platform for job seekers. Practice with AI, get pe
 - Node.js 18+
 - npm or yarn
 - Supabase account
-- Google Cloud Console project (for OAuth)
+- Firebase project (for Google SSO)
 
-### Supabase Setup
+### Firebase Setup (Google SSO)
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project or select an existing one
+3. Go to **Authentication** > **Sign-in method**
+4. Enable **Google** as a sign-in provider
+5. Configure the OAuth consent screen:
+   - App name: **Preppo** (this shows as "Continue with Preppo" in Google sign-in)
+   - Support email: Your email
+6. Go to **Project Settings** > **General**
+7. Scroll down to "Your apps" and add a **Web app**
+8. Copy the Firebase config values
+
+### Supabase Third-Party Auth Setup
 
 1. Create a new Supabase project at [supabase.com](https://supabase.com)
-2. Get your project URL and anon key from Settings > API
-3. The database schema is already set up with the required tables
+2. Go to **Authentication** > **Providers** (Supabase dashboard)
+3. Scroll down to **Third-party Auth**
+4. Add **Firebase** as a third-party auth provider:
+   - Firebase Project ID: (from Firebase Console)
+5. The database schema is already set up with the required tables
 
-### Google OAuth Setup
+### Firebase Cloud Functions (Required)
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the Google+ API
-4. Go to **Credentials** > **Create Credentials** > **OAuth client ID**
-5. Configure the OAuth consent screen:
-   - User Type: External (or Internal for G Suite)
-   - App name: Honest Hire
-   - Authorized domains: Your domain (e.g., `yourdomain.com`)
-6. Create OAuth 2.0 Client ID:
-   - Application type: Web application
-   - Authorized redirect URIs:
-     - `https://oirbuwugodjpogrdeyrl.supabase.co/auth/v1/callback` (your Supabase callback)
-     - `http://localhost:3000/auth/callback` (for local development)
-7. Copy the Client ID and Client Secret
+You need to deploy Firebase Cloud Functions to add the `role: 'authenticated'` custom claim to users. This is required for Supabase to recognize users.
 
-### Supabase Google OAuth Configuration
+1. Install Firebase CLI: `npm install -g firebase-tools`
+2. Initialize Firebase Functions in your project
+3. Create the blocking functions (see [Supabase Firebase Auth docs](https://supabase.com/docs/guides/auth/third-party/firebase-auth)):
 
-1. In Supabase Dashboard, go to **Authentication** > **Providers**
-2. Enable **Google** provider
-3. Enter your Google OAuth Client ID and Client Secret
-4. The redirect URI is automatically configured: `https://oirbuwugodjpogrdeyrl.supabase.co/auth/v1/callback`
+```typescript
+// functions/src/index.ts
+import { beforeUserCreated, beforeUserSignedIn } from 'firebase-functions/v2/identity'
+
+export const beforecreated = beforeUserCreated((event) => {
+  return {
+    customClaims: {
+      role: 'authenticated',
+    },
+  }
+})
+
+export const beforesignedin = beforeUserSignedIn((event) => {
+  return {
+    customClaims: {
+      role: 'authenticated',
+    },
+  }
+})
+```
+
+4. Deploy: `firebase deploy --only functions`
 
 ### Environment Setup
 
@@ -66,26 +89,29 @@ AI-powered interview practice platform for job seekers. Practice with AI, get pe
 cp .env.example .env.local
 ```
 
-2. Fill in your environment variables (Supabase keys are pre-filled):
+2. Fill in your environment variables:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://oirbuwugodjpogrdeyrl.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pcmJ1d3Vnb2RqcG9ncmRleXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMjU2MDEsImV4cCI6MjA3OTYwMTYwMX0.OqEuFQh4yJXPgg_CJZikKv983mYr4oGy6VJhpKG6-W4
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pcmJ1d3Vnb2RqcG9ncmRleXJsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDAyNTYwMSwiZXhwIjoyMDc5NjAxNjAxfQ.YdqeKemGY0Odbt_bamuoZ4S-01uv0_HPt59DqmfFnWU
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
-# Google OAuth (configured in Supabase, but kept here for future Calendar/Meet API)
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback/google
+# Firebase (from Firebase Console > Project Settings > Your apps > Web app)
+NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 
 # OpenAI API (for all AI interview features)
-OPENAI_API_KEY=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
+OPENAI_API_KEY=your-openai-api-key
 ```
 
-**Note**: 
-- All Supabase keys (URL, anon key, and service role key) are already configured from your project
-- Google OAuth is configured directly in Supabase. The `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables are optional and reserved for future Google Calendar/Meet API integration.
-- All AI features use OpenAI: Practice mode uses GPT Realtime API (`gpt-realtime-mini`) for voice interviews, and text-based interviews use GPT-4o-mini. Set `OPENAI_API_KEY` with your OpenAI API key.
+**Notes**: 
+- Firebase handles Google SSO authentication
+- Firebase tokens are passed to Supabase via Third-Party Auth
+- All AI features use OpenAI: Practice mode uses GPT Realtime API for voice interviews
 
 ### Installation
 
@@ -119,9 +145,8 @@ app/
   resume/page.tsx         # Resume Builder & ATS Matcher
   interviews/[id]/page.tsx # Interview console
   auth/
-    signin/page.tsx       # Sign in page
-    signup/page.tsx       # Sign up page
-    callback/route.ts     # OAuth callback handler
+    signin/page.tsx       # Sign in page (Firebase Google SSO)
+    signup/page.tsx       # Sign up page (Firebase Google SSO)
   api/
     sessions/             # API stubs for realtime features
     resume/
@@ -130,26 +155,23 @@ app/
 
 components/
   NavBar.tsx              # Navigation bar
+  NavBarWrapper.tsx       # NavBar with Firebase auth state
+  AuthProvider.tsx        # Firebase auth context provider
   InterviewForm.tsx       # Interview creation form
   InterviewList.tsx       # List of interviews
   PracticeLayout.tsx      # Practice mode UI
   ResumeBuilder.tsx       # Resume Builder & ATS Matcher UI
-  CheatMonitor.tsx        # Integrity monitoring widget
   ui/                     # Reusable UI components
 
 lib/
+  firebase.ts             # Firebase initialization
   supabase/
-    client.ts             # Browser Supabase client
+    client.ts             # Browser Supabase client (uses Firebase tokens)
     server.ts             # Server Supabase client
     middleware.ts         # Auth middleware helper
-    types.ts              # TypeScript types (generated from Supabase MCP)
-  types/
-    resume.ts             # Resume Builder TypeScript types
-  auth.ts                 # Auth helper functions
+    types.ts              # TypeScript types
   auth/
-    google.ts             # Google SSO helper functions
-  google.ts               # Google Calendar/Meet stubs
-  realtime.ts             # OpenAI Realtime stubs
+    google.ts             # Firebase Google SSO helper functions
   openai.ts              # OpenAI text-based interview functions
   openai-realtime.ts     # OpenAI Realtime WebRTC client
   resumeParser.ts        # PDF and DOCX parsing
@@ -161,38 +183,32 @@ lib/
 
 ## Database Schema
 
-The app uses these main tables (managed via Supabase MCP):
+The app uses these main tables (managed via Supabase):
 
-- **profiles**: User profiles linked to Supabase Auth
+- **profiles**: User profiles (linked to Firebase Auth user IDs)
 - **interviews**: Interview sessions with scheduling info
 - **interview_events**: Event log for each interview
 - **cheat_snapshots**: Integrity monitoring snapshots
 - **practice_sessions**: AI practice interview sessions and feedback
 - **resume_analyses**: Resume ATS match results and study plans
 
-All tables have Row Level Security (RLS) enabled. TypeScript types are automatically generated from the Supabase schema.
+All tables have Row Level Security (RLS) enabled.
 
 ## Authentication
 
-### Email/Password Authentication
+### Firebase + Supabase Third-Party Auth
 
-Users can sign up and sign in with email and password. Email verification is handled by Supabase.
+This app uses Firebase Auth for Google SSO, connected to Supabase via Third-Party Auth:
 
-### Google SSO (Single Sign-On)
+1. **Sign In/Sign Up**: Users authenticate with Google via Firebase popup
+2. **Token Flow**: Firebase ID tokens are passed to Supabase for database access
+3. **Profile Sync**: User profiles are created in Supabase on first sign-in
+4. **Seamless Experience**: Works on both sign-in and sign-up pages
 
-Google OAuth is fully integrated:
-
-- **Sign In/Sign Up**: Users can authenticate with their Google account
-- **Automatic Profile Creation**: User profiles are automatically created/updated from Google OAuth metadata
-- **Avatar & Name Sync**: Profile picture and full name are synced from Google account
-- **Seamless Experience**: Works on both sign-in and sign-up pages
-
-The Google SSO flow:
-1. User clicks "Continue with Google"
-2. Redirects to Google OAuth consent screen
-3. After consent, redirects to `/auth/callback`
-4. Profile is created/updated automatically
-5. User is redirected to dashboard
+Benefits of this setup:
+- **Custom branding**: Google SSO shows "Preppo" as the app name
+- **No Supabase URL**: Users see "preppo.ai" instead of Supabase domain
+- **Firebase features**: Access to Firebase Analytics, Crashlytics, etc.
 
 ## Deployment
 
@@ -200,7 +216,7 @@ This project is optimized for Vercel deployment:
 
 1. Push to GitHub
 2. Import project in Vercel
-3. Add environment variables
+3. Add environment variables (including Firebase config)
 4. Deploy
 
 ## Resume Builder & ATS Matcher
@@ -210,10 +226,10 @@ The `/resume` page provides a comprehensive resume analysis tool:
 ### Features
 
 - **Resume Upload**: Upload your resume in PDF or DOCX format
-- **Job URL Parsing**: Paste any public job posting URL (LinkedIn, Indeed, company career pages, etc.)
-- **ATS Match Score**: Get a 0-100 score based on keyword matching between your resume and the job description
-- **Keyword Analysis**: See which keywords from the job posting are present in your resume and which are missing
-- **AI Study Plan**: Generate a personalized learning path to acquire missing skills using OpenAI GPT
+- **Job URL Parsing**: Paste any public job posting URL
+- **ATS Match Score**: Get a 0-100 score based on keyword matching
+- **Keyword Analysis**: See matched and missing keywords
+- **AI Study Plan**: Generate a personalized learning path
 
 ### How It Works
 
@@ -221,38 +237,18 @@ The `/resume` page provides a comprehensive resume analysis tool:
 2. Paste a public job posting URL
 3. Click "Analyze & Match Resume"
 4. View your ATS match score and keyword breakdown
-5. Optionally generate an AI-powered study plan for missing skills
+5. Optionally generate an AI-powered study plan
 
 ### Supported File Types
 
 - PDF (`.pdf`)
 - Microsoft Word (`.docx`)
-- Note: Old `.doc` format is not supported; please convert to `.docx`
 
 ### Job URL Requirements
 
 - The URL must be publicly accessible (no login required)
-- Works with most job boards and company career pages
-- The tool respects robots.txt and does not bypass any protections
-
-### Extension Points
-
-- **Enhanced Scraping**: Improve job parsing in `lib/jobScraper.ts`
-- **LLM Resume Generation**: Add tailored resume generation in a new `lib/llm.ts` module
-- **Custom Keyword Lists**: Extend `lib/atsMatcher.ts` with industry-specific keywords
-
-### Dependencies
-
-The Resume Builder uses these additional packages:
-- `pdf-parse` - PDF text extraction
-- `mammoth` - DOCX to text conversion
-- `cheerio` - HTML parsing for job descriptions
-
-## Future Integrations
-
-- **Google Calendar API**: Real calendar event creation
-- **Google Meet API**: Actual Meet link generation
-- **AI Resume Generation**: Generate tailored resumes using LLM
+- Note: Some sites (LinkedIn, Indeed) may block automated access
+- Works best with company career pages
 
 ## License
 

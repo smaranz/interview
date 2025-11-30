@@ -248,7 +248,7 @@ export function PracticeLayout({ userId }: PracticeLayoutProps) {
       }
     }
 
-    const systemInstruction = `YOU (THE AI ASSISTANT) are Alex, a professional job interviewer conducting a LIVE JOB INTERVIEW.
+    const systemInstruction = `You are Alex, a professional job interviewer conducting a LIVE JOB INTERVIEW.
 
 CRITICAL - UNDERSTAND THE ROLES:
 - YOU (the AI receiving these instructions) are Alex, the INTERVIEWER

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { NavBar } from '@/components/NavBar'
-import { createClient } from '@/lib/supabase/server'
+import { AuthProvider } from '@/components/AuthProvider'
+import { NavBarWrapper } from '@/components/NavBarWrapper'
 
 const inter = Inter({
   variable: '--font-geist-sans',
@@ -21,42 +21,18 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  let user = null
-  let fullName: string | null = null
-  
-  try {
-    const supabase = await createClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    
-    if (authUser) {
-      user = authUser
-      // Fetch profile to get full_name
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', authUser.id)
-        .single()
-      
-      fullName = profile?.full_name || null
-    }
-  } catch (error) {
-    // Silently fail - user will be null and NavBar will handle it
-    console.error('Error getting user in layout:', error)
-  }
-
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <NavBar 
-          user={user ? { email: user.email || '', id: user.id, fullName } : null} 
-          isSubscribed={false} // TODO: Connect to real subscription status
-        />
-        {children}
+        <AuthProvider>
+          <NavBarWrapper isSubscribed={false} />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

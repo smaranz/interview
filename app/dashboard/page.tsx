@@ -1,22 +1,108 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { getPracticeSessions, getPracticeSessionStats } from '@/lib/practice-sessions'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
 import { PracticeStats } from '@/components/PracticeStats'
 import { PracticeSessionList } from '@/components/PracticeSessionList'
 
-export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+interface PracticeSession {
+  id: string
+  job_url: string
+  job_title: string | null
+  duration: string
+  score: number | null
+  created_at: string
+  feedback: {
+    strengths?: string[]
+    improvements?: string[]
+    overallFeedback?: string
+  } | null
+}
 
-  if (!user) {
-    redirect('/auth/signin')
+interface Stats {
+  totalSessions: number
+  avgScore: number
+  completedSessions: number
+  totalPracticeMinutes: number
+}
+
+export default function DashboardPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const [sessions, setSessions] = useState<PracticeSession[]>([])
+  const [stats, setStats] = useState<Stats>({
+    totalSessions: 0,
+    avgScore: 0,
+    completedSessions: 0,
+    totalPracticeMinutes: 0,
+  })
+  const [dataLoading, setDataLoading] = useState(true)
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (user) {
+      fetchDashboardData()
+    }
+  }, [user, loading, router])
+
+  const fetchDashboardData = async () => {
+    try {
+      const supabase = createClient()
+      
+      // Fetch practice sessions
+      const { data: sessionsData, error: sessionsError } = await supabase
+        .from('practice_sessions')
+        .select('*')
+        .eq('user_id', user!.uid)
+        .order('created_at', { ascending: false })
+      
+      if (sessionsError) {
+        console.error('Error fetching sessions:', sessionsError)
+      } else {
+        setSessions(sessionsData || [])
+        
+        // Calculate stats
+        const completedSessions = sessionsData?.filter(s => s.score !== null) || []
+        const totalMinutes = sessionsData?.reduce((acc, s) => {
+          const mins = s.duration === '25min' ? 25 : 10
+          return acc + mins
+        }, 0) || 0
+        
+        const avgScore = completedSessions.length > 0
+          ? completedSessions.reduce((acc, s) => acc + (s.score || 0), 0) / completedSessions.length
+          : 0
+        
+        setStats({
+          totalSessions: sessionsData?.length || 0,
+          avgScore: Math.round(avgScore),
+          completedSessions: completedSessions.length,
+          totalPracticeMinutes: totalMinutes,
+        })
+      }
+    } catch (error) {
+      console.error('Error loading dashboard:', error)
+    } finally {
+      setDataLoading(false)
+    }
   }
 
-  // Fetch practice sessions and stats
-  const [sessions, stats] = await Promise.all([
-    getPracticeSessions(user.id),
-    getPracticeSessionStats(user.id),
-  ])
+  if (loading || dataLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-white/60">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null // Will redirect
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">

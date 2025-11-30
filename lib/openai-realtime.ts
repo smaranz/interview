@@ -330,6 +330,8 @@ export class OpenAIRealtimeClient {
 
     this.dataChannel.onopen = () => {
       console.log('Data channel opened, sending session update')
+      console.log('Session instructions length:', this.currentInstructions.length)
+      console.log('Session instructions preview:', this.currentInstructions.substring(0, 200))
       this.sessionReady = false
       
       // Update session with instructions
@@ -346,6 +348,7 @@ export class OpenAIRealtimeClient {
           },
         },
       })
+      console.log('Session update sent with instructions')
     }
 
     this.dataChannel.onmessage = (event) => {
@@ -368,11 +371,12 @@ export class OpenAIRealtimeClient {
     this.hasAlexSpokenFirst = true
     console.log('Enabling user input (fallback or normal flow)')
     
-    // Enable voice activity detection
+    // Enable voice activity detection - preserve instructions
     this.sendEvent({
       type: 'session.update',
       session: {
         type: 'realtime',
+        instructions: this.currentInstructions, // Preserve instructions
         audio: {
           voice_activity_detection: {
             enabled: true,
@@ -395,31 +399,18 @@ export class OpenAIRealtimeClient {
       return
     }
     
-    console.log('Starting conversation, sending response.create with explicit instructions')
-    // Create the first response - Alex MUST introduce himself first
-    // Add explicit instructions to ensure Alex introduces himself as an interviewer
+    console.log('Starting conversation, sending response.create')
+    console.log('Full session instructions length:', this.currentInstructions.length)
+    // Create the first response - include full instructions to ensure they're applied
+    // Both session-level and response-level instructions help ensure OpenAI gets the prompt
     this.sendEvent({
       type: 'response.create',
       response: {
-        instructions: `You are Alex, a professional and strict job interviewer. 
-
-ROLE:
-- You are NOT an AI assistant. You are a human interviewer named Alex.
-- Your ONLY goal is to conduct a job interview.
-- You MUST speak first.
-- Be professional, concise, and focused.
-
-START IMMEDIATELY:
-- Say: "Hi, I'm Alex. I'll be conducting your interview today. Let's start by having you introduce yourself and tell me a bit about your background."
-
-RULES:
-- Do NOT say "How can I help you".
-- Do NOT act like a helpful assistant.
-- Ask one question at a time.
-- Wait for the candidate's answer.`,
+        instructions: this.currentInstructions, // Use the full detailed instructions
         modalities: ['audio'], // Explicitly request audio output
       },
     })
+    console.log('Response.create sent with full instructions')
 
     // Fallback: If Alex doesn't speak within 10 seconds, enable user input to prevent getting stuck
     setTimeout(() => {
@@ -457,9 +448,12 @@ RULES:
 
     if (event.type === 'session.updated') {
       console.log('Session updated successfully, starting conversation')
+      console.log('Session.updated event:', event)
       this.sessionReady = true
-      // Now that session is ready, start the conversation
-      this.startConversation()
+      // Small delay to ensure session is fully ready
+      setTimeout(() => {
+        this.startConversation()
+      }, 100)
     }
 
     if (event.type === 'response.created') {
