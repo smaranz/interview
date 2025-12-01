@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PracticeLayout } from '@/components/PracticeLayout'
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 export default async function PracticePage() {
   try {
     const supabase = await createClient()

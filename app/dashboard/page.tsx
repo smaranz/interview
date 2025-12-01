@@ -4,6 +4,9 @@ import { getPracticeSessions, getPracticeSessionStats } from '@/lib/practice-ses
 import { PracticeStats } from '@/components/PracticeStats'
 import { PracticeSessionList } from '@/components/PracticeSessionList'
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

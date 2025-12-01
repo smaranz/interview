@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ResumeBuilder from '@/components/ResumeBuilder'
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 export default async function ResumePage() {
   try {
     const supabase = await createClient()

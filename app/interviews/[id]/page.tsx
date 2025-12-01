@@ -26,6 +26,9 @@ const statusLabels: Record<Interview['status'], string> = {
   cancelled: 'Cancelled',
 }
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 export default async function InterviewPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
