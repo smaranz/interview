@@ -67,12 +67,12 @@ AI-powered interview practice platform for job seekers. Practice with AI, get pe
 cp .env.example .env.local
 ```
 
-2. Fill in your environment variables (Supabase keys are pre-filled):
+2. Fill in your environment variables with values from your own Supabase and OpenAI projects:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://oirbuwugodjpogrdeyrl.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pcmJ1d3Vnb2RqcG9ncmRleXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMjU2MDEsImV4cCI6MjA3OTYwMTYwMX0.OqEuFQh4yJXPgg_CJZikKv983mYr4oGy6VJhpKG6-W4
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pcmJ1d3Vnb2RqcG9ncmRleXJsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDAyNTYwMSwiZXhwIjoyMDc5NjAxNjAxfQ.YdqeKemGY0Odbt_bamuoZ4S-01uv0_HPt59DqmfFnWU
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 
 # Google OAuth (configured in Supabase, but kept here for future Calendar/Meet API)
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -80,11 +80,11 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback/google
 
 # OpenAI API (for all AI interview features)
-OPENAI_API_KEY=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
+OPENAI_API_KEY=sk-your-openai-key-here
 ```
 
 **Note**: 
-- All Supabase keys (URL, anon key, and service role key) are already configured from your project
+- Supabase values come from your project dashboard (Settings → API). `SUPABASE_SERVICE_ROLE_KEY` is server-side only — it bypasses Row Level Security, so keep it out of committed files and client code.
 - Google OAuth is configured directly in Supabase. The `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables are optional and reserved for future Google Calendar/Meet API integration.
 - All AI features use OpenAI: Practice mode uses GPT Realtime API (`gpt-realtime-mini`) for voice interviews, and text-based interviews use GPT-4o-mini. Set `OPENAI_API_KEY` with your OpenAI API key.
 
